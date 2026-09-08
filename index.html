@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自然语言处理从零开始 · 互动式入门教程</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ======================= 顶部横幅 ======================= -->
+<header class="hero">
+  <h1>自然语言处理从零开始</h1>
+  <p>一门「能动手玩」的 NLP 入门课：从分词、TF-IDF、朴素贝叶斯，到词向量、注意力机制与大语言模型。每个概念都有公式、图解和可交互的实验，零基础友好。</p>
+  <div class="badges">
+    <span class="badge">零基础友好</span>
+    <span class="badge">6 个交互式演示</span>
+    <span class="badge">中英术语对照</span>
+    <span class="badge">离线可用 · 无需安装</span>
+  </div>
+</header>
+
+<!-- ======================= 顶部导航 ======================= -->
+<nav class="nav">
+  <div class="nav-inner" id="topNav">
+    <a href="#sec1">1 什么是 NLP</a>
+    <a href="#sec2">2 文本预处理</a>
+    <a href="#sec3">3 词袋与 TF-IDF</a>
+    <a href="#sec4">4 朴素贝叶斯</a>
+    <a href="#sec5">5 N-gram 语言模型</a>
+    <a href="#sec6">6 词向量与语义</a>
+    <a href="#sec7">7 序列模型 RNN/LSTM</a>
+    <a href="#sec8">8 注意力与 Transformer</a>
+    <a href="#sec9">9 预训练大模型</a>
+    <a href="#sec10">10 NLP 评估</a>
+    <a href="#sec11">11 实战与路线</a>
+    <a href="#glossary">术语表</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- ======================= 目录侧栏 ======================= -->
+  <aside class="toc" id="tocSide">
+    <h2>目录 Contents</h2>
+    <a href="#sec1">1 什么是 NLP</a>
+    <a href="#sec2">2 文本预处理</a>
+    <a href="#sec3">3 词袋与 TF-IDF</a>
+    <a href="#sec4">4 朴素贝叶斯</a>
+    <a href="#sec5">5 N-gram 语言模型</a>
+    <a href="#sec6">6 词向量与语义</a>
+    <a href="#sec7">7 序列模型 RNN/LSTM</a>
+    <a href="#sec8">8 注意力与 Transformer</a>
+    <a href="#sec9">9 预训练大模型</a>
+    <a href="#sec10">10 NLP 评估</a>
+    <a href="#sec11">11 实战与路线</a>
+    <a href="#glossary">附录 · 术语表</a>
+  </aside>
+
+  <main class="content">
+
+  <!-- ======================= 第一章：什么是 NLP ======================= -->
+  <section class="chapter" id="sec1">
+    <h2><span class="chapter-no">1</span>什么是自然语言处理</h2>
+    <p class="chapter-sub">What is Natural Language Processing</p>
+
+    <p>自然语言处理（<span class="en">Natural Language Processing</span>，简称 NLP）是人工智能的一个分支：<strong>让计算机理解、处理、生成人类语言</strong>。它横跨计算机科学、语言学和数学——因为我们日常交流用的中文、英文是「给人设计的」，充满模糊和省略，机器处理起来远比处理表格数字困难。</p>
+
+    <h3>1.1 理解与生成：NLP 的两大方向</h3>
+    <ul>
+      <li><strong>自然语言理解 NLU</strong>（<span class="en">Natural Language Understanding</span>）：从文本里「读出」含义——分词、情感分析、意图识别、信息抽取、问答。</li>
+      <li><strong>自然语言生成 NLG</strong>（<span class="en">Natural Language Generation</span>）：把含义「写成」文本——自动摘要、机器翻译、对话回复、写代码。</li>
+    </ul>
+    <p>今天的 ChatGPT 类模型同时具备两者：先「理解」你的问题，再「生成」回答。</p>
+
+    <h3>1.2 无处不在的应用</h3>
+    <table class="tb">
+      <tr><th>应用</th><th>英文</th><th>任务类型</th><th>例子</th></tr>
+      <tr><td>机器翻译</td><td><span class="en">Machine Translation</span></td><td>生成</td><td>Google 翻译、DeepL</td></tr>
+      <tr><td>文本分类</td><td><span class="en">Text Classification</span></td><td>理解</td><td>垃圾邮件过滤、新闻归类、情感分析</td></tr>
+      <tr><td>信息检索</td><td><span class="en">Information Retrieval</span></td><td>理解</td><td>搜索引擎、文档搜索</td></tr>
+      <tr><td>问答系统</td><td><span class="en">Question Answering</span></td><td>理解+生成</td><td>智能客服、AI 助手</td></tr>
+      <tr><td>文本摘要</td><td><span class="en">Text Summarization</span></td><td>生成</td><td>新闻简报、会议纪要</td></tr>
+      <tr><td>命名实体识别</td><td><span class="en">Named Entity Recognition</span></td><td>理解</td><td>从新闻里抽出人名、地名、机构名</td></tr>
+    </table>
+
+    <h3>1.3 为什么 NLP 特别难？</h3>
+    <div class="analogy"><span class="tag">通俗理解</span>
+      人类理解语言靠的是「常识 + 上下文」：「苹果发布会」里的苹果是公司，「苹果很甜」里的苹果是水果——同样的词，含义由语境决定。机器没有人生经验，只能从数据里统计规律。
+    </div>
+    <ul>
+      <li><strong>歧义 Ambiguity</strong>：「他借我这本书」——是他借给我，还是我借给他？「咬死了猎人的狗」是狗咬死了猎人，还是猎人的狗被咬死了？</li>
+      <li><strong>同义与省略</strong>：同样问「北京到上海多远」，可以有十几种说法，还经常省略主语。</li>
+      <li><strong>长距离依赖 Long-distance Dependency</strong>：「那只我三年前在公园里捡到的猫」——「猫」和谓语可能隔着十几个字。</li>
+      <li><strong>反讽与言外之意</strong>：「这服务真是棒极了」可能恰恰是差评。</li>
+    </ul>
+
+    <h3>1.4 NLP 发展的三个时代</h3>
+    <div class="cards3">
+      <div class="card">
+        <h4><span class="dot blue"></span>规则时代（1950s–1980s）</h4>
+        <p>语言学家手写语法规则：词性、句法树、正则表达式。能处理小范围问题，但规则永远写不完，换个领域就失效。</p>
+      </div>
+      <div class="card">
+        <h4><span class="dot teal"></span>统计机器学习时代（1990s–2010s）</h4>
+        <p>从大规模语料里数数、算概率：TF-IDF、朴素贝叶斯、N-gram、隐马尔可夫模型、CRF。本课第 3–5 章就是这个时代的核心。</p>
+      </div>
+      <div class="card">
+        <h4><span class="dot orange"></span>神经网络与预训练时代（2013–至今）</h4>
+        <p>词向量 word2vec（2013）→ Transformer（2017）→ BERT/GPT（2018）→ ChatGPT（2022）。模型先在海量文本上「预训练」，再适配具体任务。本课第 6–9 章覆盖。</p>
+      </div>
+    </div>
+
+    <h3>1.5 NLP 流水线</h3>
+    <div class="pipeline">
+      <div class="pipe-step"><b>原始文本</b>字符串</div>
+      <div class="pipe-arrow">&#8594;</div>
+      <div class="pipe-step"><b>预处理</b>分词/清洗/规范化</div>
+      <div class="pipe-arrow">&#8594;</div>
+      <div class="pipe-step"><b>特征化</b>变成数字（TF-IDF/词向量）</div>
+      <div class="pipe-arrow">&#8594;</div>
+      <div class="pipe-step"><b>模型</b>分类/生成/检索</div>
+      <div class="pipe-arrow">&#8594;</div>
+      <div class="pipe-step"><b>输出</b>标签/句子/排名</div>
+    </div>
+
+    <div class="takeaway"><span class="tag">本章小结</span>
+      <ul>
+        <li>NLP = 让机器理解（NLU）和生成（NLG）人类语言，本质是把<strong>文本变成数字</strong>再让模型处理。</li>
+        <li>难点在于歧义、省略、长距离依赖——语言是为「有常识的人」设计的。</li>
+        <li>三条技术路线：规则 → 统计 → 神经网络预训练，本课按这条时间线展开。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ======================= 第二章：文本预处理 ======================= -->
+  <section class="chapter" id="sec2">
+    <h2><span class="chapter-no">2</span>文本预处理：把乱糟糟的文字收拾干净</h2>
+    <p class="chapter-sub">Text Preprocessing</p>
+
+    <p>原始文本是「非结构化」的字符串，直接喂给模型没法用。预处理（<span class="en">Preprocessing</span>）是 NLP 的地基，决定了后面一切效果——就像做菜前要洗菜、切菜。</p>
+
+    <h3>2.1 分词：把句子切成词</h3>
+    <p>分词（<span class="en">Tokenization</span>）把连续文本切成最小的语义单元——词元（<span class="en">Token</span>）。英文按空格和标点切就行；中文没有空格，是 NLP 的独特难题：</p>
+    <ul>
+      <li><strong>英文</strong>："I love NLP" → ["I", "love", "NLP"]，规则简单。</li>
+      <li><strong>中文</strong>："我们爱自然语言处理" → 可能切成「我们/爱/自然语言处理」或「我们/爱/自然/语言/处理」——切法不同，含义可能不同（经典例子：「南京市长江大桥」）。</li>
+    </ul>
+    <p>经典中文分词方法：<strong>词典最大匹配</strong>（<span class="en">Maximum Matching</span>，用词典从前往后贪心匹配最长词）和<strong>统计方法</strong>（按概率找最优切分）。今天的工业标准是 jieba 分词库。</p>
+
+    <h3>2.2 规范化：统一格式</h3>
+    <ul>
+      <li><strong>小写化 Lowercasing</strong>："Apple" 和 "apple" 是同一个词（注意：专有名词小写化可能丢信息，如 "Bush" 总统 vs "bush" 灌木丛）。</li>
+      <li><strong>去标点、去数字、去特殊符号</strong>：多数任务里 "!!!" 和 URL 是噪声。</li>
+      <li><strong>去停用词 Stop Words</strong>：删除「的、了、在、the、a、is」等高频但几乎不携带语义的词，可以大幅缩小词典、加快训练。注意：情感分析等任务里停用词可能有用，要按任务取舍。</li>
+    </ul>
+
+    <h3>2.3 词干提取与词形还原</h3>
+    <p>英文有形态变化（run/runs/ran/running），把变体归一可以合并统计量：</p>
+    <ul>
+      <li><strong>词干提取 Stemming</strong>：按规则暴力砍后缀——"running" → "run"，"studies" → "studi"（可能产出不是词的「伪词干」，快但糙）。</li>
+      <li><strong>词形还原 Lemmatization</strong>：查词典变回原形——"ran" → "run"，"better" → "good"（准确但慢，需要词性标注）。</li>
+    </ul>
+
+    <h3>2.4 动手玩：完整的预处理流水线</h3>
+    <div class="demo">
+      <p class="demo-title">演示 1 · 预处理流水线</p>
+      <p class="demo-tip">输入一句话，勾选/取消各个处理步骤，观察每一步的输出变化。中文分词用的是「词典最大匹配」算法（内置一个小词典），英文词干提取是简化版规则。划掉的灰色词是被停用词过滤掉的。</p>
+      <div class="controls">
+        <button class="btn on" id="pp-en">English 示例</button>
+        <button class="btn" id="pp-zh">中文示例</button>
+      </div>
+      <div class="controls">
+        <div class="ctrl-group"><input type="text" id="pp-input" value="The cats are running quickly through the park!"></div>
+      </div>
+      <div class="controls">
+        <div class="ctrl-group"><label><input type="checkbox" id="pp-tok" checked> 分词</label></div>
+        <div class="ctrl-group"><label><input type="checkbox" id="pp-lower" checked> 小写化</label></div>
+        <div class="ctrl-group"><label><input type="checkbox" id="pp-stop" checked> 去停用词</label></div>
+        <div class="ctrl-group"><label><input type="checkbox" id="pp-stem" checked> 词干提取</label></div>
+      </div>
+      <div id="pp-output"></div>
+      <p class="pp-note" id="pp-note"></p>
+    </div>
+
+    <div class="notice"><span class="tag">注意</span>预处理没有「标准答案」：做情感分析时「不、没」这类否定词绝不能当停用词删掉——删了「不」，「不错」就变成「错」了。一切以任务为准。</div>
+
+    <div class="takeaway"><span class="tag">本章小结</span>
+      <ul>
+        <li>分词把文本切成词元（Token）；中文分词靠词典匹配或统计方法。</li>
+        <li>小写化、去停用词、词干提取（规则砍后缀）是三大规范化手段。</li>
+        <li>预处理步骤的选择必须服从任务目标，不要机械套用。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ======================= 第三章：词袋与 TF-IDF ======================= -->
+  <section class="chapter" id="sec3">
+    <h2><span class="chapter-no">3</span>词袋模型与 TF-IDF：文本变成数字的第一步</h2>
+    <p class="chapter-sub">Bag of Words · TF-IDF</p>
+
+    <p>模型只会算数，所以文本必须变成向量。最朴素的想法是<strong>独热编码</strong>（<span class="en">One-hot Encoding</span>）：给词典里每个词分配一个下标，每个词用「只有一位是 1、其余全是 0」的向量表示：</p>
+    <table class="tb">
+      <tr><th>词</th><th>下标</th><th>独热向量（维度 = 词典大小）</th></tr>
+      <tr><td>猫</td><td>0</td><td>[1, 0, 0, …]</td></tr>
+      <tr><td>狗</td><td>1</td><td>[0, 1, 0, …]</td></tr>
+      <tr><td>苹果</td><td>2</td><td>[0, 0, 1, …]</td></tr>
+    </table>
+    <p>独热编码有两个致命伤：① 词典几万到几十万词，向量维度爆炸且几乎全 0（稀疏 <span class="en">Sparse</span>）；② 任意两个词的向量都互相垂直——「猫」和「狗」的相似度与「猫」和「苹果」完全相同（都是 0），<strong>完全不携带语义</strong>。</p>
+
+    <h3>3.1 词袋模型：一篇文档 = 一个计数向量</h3>
+    <p>词袋模型（<span class="en">Bag of Words</span>，BoW）把整篇文档放进一个「袋子」：只数每个词出现了几次，<strong>完全忽略词序</strong>（所以叫袋子，不叫序列）。"猫 追 狗" 和 "狗 追 猫" 在词袋里一模一样——这是它最大的缺陷，但很多任务（如主题分类）用词频就够用了。</p>
+
+    <div class="analogy"><span class="tag">通俗理解</span>
+      词袋模型像「数豆子」：把文档里的词当各种颜色的豆子，不看它们排列的顺序，只记录每种颜色有几颗。判断一篇文档是不是「体育新闻」，看「比赛、进球、球队」这类豆子多不多就够了。
+    </div>
+
+    <h3>3.2 TF-IDF：给重要的词更高的权重</h3>
+    <p>词袋的毛病：每篇文档里「的、是、the」这类词次数都最多，却几乎不含信息。TF-IDF 修正这一点——<strong>一个词越在这篇文档里频繁出现、越少在其他文档出现，权重越高</strong>：</p>
+    <div class="formula">
+      <span class="fn">词频 TF（Term Frequency，本文档内的热度）：</span>
+      tf(<i>t</i>, <i>d</i>) = <span class="frac"><span class="num">词 <i>t</i> 在文档 <i>d</i> 中的出现次数</span><span class="den">文档 <i>d</i> 的总词数</span></span>
+    </div>
+    <div class="formula">
+      <span class="fn">逆文档频率 IDF（Inverse Document Frequency，全局的稀缺度）：</span>
+      idf(<i>t</i>) = log <span class="frac"><span class="num"><i>N</i></span><span class="den">1 + df(<i>t</i>)</span></span>
+    </div>
+    <div class="formula">
+      <span class="fn">TF-IDF 权重（两者相乘）：</span>
+      <i>w</i>(<i>t</i>, <i>d</i>) = tf(<i>t</i>, <i>d</i>) × idf(<i>t</i>)
+    </div>
+    <p>其中 <i>N</i> 是文档总数，df(t) 是包含词 t 的文档数（分母 +1 防止除零）。解读：出现在所有文档里的词 df=N → idf≈log(1)≈0 → 权重归零；只出现在极少数文档里的词 → idf 大 → 是「特征词」。</p>
+
+    <h3>3.3 文档相似度：余弦相似度</h3>
+    <p>文档变成 TF-IDF 向量后，「两篇文档像不像」用它们<strong>向量的夹角</strong>衡量——夹角越小越像。这就是余弦相似度（<span class="en">Cosine Similarity</span>）：</p>
+    <div class="formula">
+      <span class="fn">余弦相似度（值域 [−1, 1]，越接近 1 越相似）：</span>
+      cos(<b>A</b>, <b>B</b>) = <span class="frac"><span class="num"><b>A</b>·<b>B</b></span><span class="den">||<b>A</b>|| · ||<b>B</b>||</span></span> = <span class="frac"><span class="num"><span class="sigma"><span class="slim"><span>n</span><span>i=1</span></span><span class="sg">Σ</span></span> <i>a<sub>i</sub></i><i>b<sub>i</sub></i></span><span class="den">&#8730;<span class="sigma"><span class="slim"><span>n</span><span>i=1</span></span><span class="sg">Σ</span></span><i>a<sub>i</sub></i>² &#8730;<span class="sigma"><span class="slim"><span>n</span><span>i=1</span></span><span class="sg">Σ</span></span><i>b<sub>i</sub></i>²</span></span>
+    </div>
+    <p>除以两个向量的模长（<span class="en">Norm</span>）是为了<strong>归一化</strong>：只看「方向」不看「长度」，这样长文档和短文档也能公平比较。</p>
+
+    <h3>3.4 动手玩：迷你搜索引擎</h3>
+    <div class="demo">
+      <p class="demo-title">演示 2 · TF-IDF 迷你搜索引擎</p>
+      <p class="demo-tip">内置 4 篇不同主题的小文档（体育/科技/美食/财经）。输入查询词（可以连续输入中文，比如「苹果手机」，会自动按词典分词），系统计算 TF-IDF 向量 + 余弦相似度排名。点击某条结果可以查看该文档权重最高的 5 个词。</p>
+      <div class="controls">
+        <div class="ctrl-group"><label for="srch-input">查询</label>
+          <input type="text" id="srch-input" placeholder="例如：昨晚 比赛 激烈 / 苹果手机 芯片"></div>
+        <button class="btn primary" id="srch-btn">搜索</button>
+      </div>
+      <div id="srch-results"></div>
+      <div class="idf-note" id="srch-idf">输入查询后，这里会显示查询词的 IDF 值（越稀缺的词权重越高）</div>
+    </div>
+
+    <div class="takeaway"><span class="tag">本章小结</span>
+      <ul>
+        <li>独热编码稀疏且无语义；词袋模型用「词频向量」表示文档，但忽略词序。</li>
+        <li>TF-IDF = 词频 × 逆文档频率：一篇里多、全局少见 → 权重高。</li>
+        <li>文档相似度 = 余弦相似度（向量夹角），TF-IDF + 余弦是搜索引擎的老牌标配。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ======================= 第四章：朴素贝叶斯 ======================= -->
+  <section class="chapter" id="sec4">
+    <h2><span class="chapter-no">4</span>朴素贝叶斯：史上最经典的文本分类器</h2>
+    <p class="chapter-sub">Naive Bayes Classifier</p>
+
+    <p>朴素贝叶斯（<span class="en">Naive Bayes</span>）从<strong>贝叶斯定理</strong>（<span class="en">Bayes' Theorem</span>）出发，是垃圾邮件过滤的祖师爷，也是入门概率模型的完美教材。先回顾条件概率与贝叶斯公式：</p>
+    <div class="formula">
+      <span class="fn">贝叶斯定理（由条件概率 P(A|B)=P(A∩B)/P(B) 推出）：</span>
+      <i>P</i>(<i>A</i>|<i>B</i>) = <span class="frac"><span class="num"><i>P</i>(<i>B</i>|<i>A</i>) · <i>P</i>(<i>A</i>)</span><span class="den"><i>P</i>(<i>B</i>)</span></span>
+    </div>
+    <ul>
+      <li><strong>先验概率 Prior</strong> P(A)：还没看证据时，事件本身的概率（比如 20% 的邮件是垃圾邮件）。</li>
+      <li><strong>似然 Likelihood</strong> P(B|A)：在 A 成立的前提下观察到 B 的概率（垃圾邮件里出现「免费」的频率）。</li>
+      <li><strong>后验概率 Posterior</strong> P(A|B)：看到证据 B 后，更新过的概率（看到「免费」后，这封邮件是垃圾邮件的概率）。</li>
+      <li><strong>证据 Evidence</strong> P(B)：归一化常数，比较两类时可以被约掉。</li>
+    </ul>
+
+    <div class="analogy"><span class="tag">通俗理解</span>
+      医生先根据人群发病率给一个「基础判断」（先验），再根据化验单（证据）修正判断，得到「你现在得病的概率」（后验）。贝叶斯定理就是这个修正公式。
+    </div>
+
+    <h3>4.1 「朴素」在哪：条件独立假设</h3>
+    <p>要算 P(w₁, w₂, …, wₙ | spam)（一堆词同时出现的联合概率）太难了。朴素贝叶斯假设<strong>各词条件独立</strong>（<span class="en">Conditional Independence</span>）——给定类别后，词与词互不影响：</p>
+    <div class="formula">
+      <span class="fn">朴素假设 + 分类规则（∝ 表示成正比，比较两类时 P(w) 可约掉）：</span>
+      <i>P</i>(spam | w₁…wₙ) ∝ <i>P</i>(spam) · <i>P</i>(w₁|spam) · <i>P</i>(w₂|spam) ⋯ <i>P</i>(wₙ|spam)
+    </div>
+    <p>这个假设在现实中「明显不对」——「免费」和「中奖」经常一起出现，并不独立。但神奇的是：<strong>即使假设不成立，朴素贝叶斯的分类结果往往依然很好</strong>（它需要的只是把概率算对大小顺序）。这就是工程中「错的模型，对的结果」的经典案例。</p>
+
+    <h3>4.2 两个工程细节</h3>
+    <ul>
+      <li><strong>取对数防下溢</strong>：几百个词的概率相乘会小到浮点数溢出（10⁻³⁰⁰⁰）。取对数后乘法变加法，比较结果不变：log P = log P(spam) + Σ log P(wᵢ|spam)。</li>
+      <li><strong>拉普拉斯平滑 Laplace Smoothing</strong>：训练集里没见过的词概率会是 0，一个 0 把整个乘积归零。给每个计数 +1（分母 +词典大小 V）兜底：P(w|c) = (count(w,c)+1)/(count(c)+V)。</li>
+    </div>
+
+    <h3>4.3 动手玩：垃圾邮件分类器</h3>
+    <div class="demo">
+      <p class="demo-title">演示 3 · 朴素贝叶斯垃圾邮件分类器</p>
+      <p class="demo-tip">用 8 条小语料（4 条垃圾邮件 + 4 条正常邮件）训练。输入一句话（中文连续输入即可，自动匹配词典），分类器用对数概率一步步计算，最后给出「垃圾邮件概率」。注意观察「免费、中奖、点击」这类词的贡献。</p>
+      <div class="controls">
+        <div class="ctrl-group"><label for="nb-input">待分类文本</label>
+          <input type="text" id="nb-input" value="恭喜 您 获得 免费 大奖" placeholder="例如：免费 点击 链接 / 明天 开会 请 准时"></div>
+        <button class="btn primary" id="nb-btn">分类</button>
+        <button class="btn" id="nb-show">查看训练语料</button>
+      </div>
+      <div id="nb-verdict"></div>
+      <div id="nb-steps"></div>
+      <div id="nb-corpus" style="display:none" class="demo-info"></div>
+    </div>
+
+    <div class="takeaway"><span class="tag">本章小结</span>
+      <ul>
+        <li>贝叶斯定理：后验 ∝ 先验 × 似然；朴素 = 假设词条件独立。</li>
+        <li>实现三件套：log 空间计算、拉普拉斯平滑、先比较后归一化。</li>
+        <li>即使独立性假设不成立，朴素贝叶斯作为「文本分类基线」依然非常能打。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ======================= 第五章：N-gram 语言模型 ======================= -->
+  <section class="chapter" id="sec5">
+    <h2><span class="chapter-no">5</span>N-gram 语言模型：让机器「接话」</h2>
+    <p class="chapter-sub">N-gram Language Models</p>
+
+    <p>语言模型（<span class="en">Language Model</span>，LM）回答一个问题：<strong>「这句话有多像人话？」</strong>——给任意词序列打一个概率。它是一切「预测下一个词」任务的数学基础：输入法联想、语音识别纠错、机器翻译选句，直到今天的 GPT。</p>
+
+    <h3>5.1 链式法则：句子概率怎么算</h3>
+    <p>一句话 w₁w₂…wₙ 的概率按链式法则（<span class="en">Chain Rule</span>）拆成条件概率连乘：</p>
+    <div class="formula">
+      <span class="fn">链式法则（精确但不可行——每种历史都要求一个参数）：</span>
+      <i>P</i>(w₁…wₙ) = <i>P</i>(w₁)·<i>P</i>(w₂|w₁)·<i>P</i>(w₃|w₁w₂)⋯<i>P</i>(wₙ|w₁…wₙ₋₁)
+    </div>
+
+    <h3>5.2 马尔可夫假设：只看前 n−1 个词</h3>
+    <p>历史越来越长，条件概率根本数不过来。N-gram 模型引入<strong>马尔可夫假设</strong>（<span class="en">Markov Assumption</span>）：下一个词只和最近的 n−1 个词有关。二元模型（<span class="en">Bigram</span>）只看前一个词，概率直接从语料里<strong>数出来</strong>：</p>
+    <div class="formula">
+      <span class="fn">Bigram 概率（极大似然估计 MLE，数数即可）：</span>
+      <i>P</i>(w<sub>i</sub>|w<sub>i−1</sub>) = <span class="frac"><span class="num">count(w<sub>i−1</sub>, w<sub>i</sub>)</span><span class="den">count(w<sub>i−1</sub>)</span></span>
+    </div>
+    <p>训练语言模型 = 统计语料里「每对相邻词」的出现次数。例：语料里「我」出现 100 次，其中「我爱」出现 30 次，则 P(爱|我) = 0.3。</p>
+    <p>未出现的组合概率是 0（数据稀疏 <span class="en">Data Sparsity</span>），需要平滑（<span class="en">Smoothing</span>）——比如拉普拉斯加一平滑（<span class="en">Add-one Smoothing</span>）：</p>
+    <div class="formula">
+      <span class="fn">加一平滑（V 为词典大小，给所有组合都留一点概率）：</span>
+      <i>P</i>(w<sub>i</sub>|w<sub>i−1</sub>) = <span class="frac"><span class="num">count(w<sub>i−1</sub>, w<sub>i</sub>) + 1</span><span class="den">count(w<sub>i−1</sub>) + <i>V</i></span></span>
+    </div>
+
+    <h3>5.3 困惑度：模型的「惊讶程度」</h3>
+    <p>语言模型好不好，用困惑度（<span class="en">Perplexity</span>，PPL）衡量：模型对测试文本「平均每个词有多惊讶」，越小越好：</p>
+    <div class="formula">
+      <span class="fn">困惑度（N 为词数；PPL=100 意味着平均每个词像从 100 个词里猜）：</span>
+      PPL = 2<sup> −<span class="frac"><span class="num">1</span><span class="den"><i>N</i></span></span> <span class="sigma"><span class="slim"><span>N</span><span>i=1</span></span><span class="sg">Σ</span></span> log₂ <i>P</i>(w<sub>i</sub>|context) </sup>
+    </div>
+
+    <h3>5.4 动手玩：Bigram 语言模型</h3>
+    <div class="demo">
+      <p class="demo-title">演示 4 · Bigram 语言模型：预测下一个词 + 随机生成文本</p>
+      <p class="demo-tip">模型用内置的 10 句小语料训练（词之间用空格分隔）。输入一个词，看模型预测的下一个词的概率排名；点「随机生成」让模型按概率逐词续写（每次结果都不同！），并观察困惑度。注意：小语料生成的内容会「不像人话」，这正说明语言模型 = 语料的浓缩。</p>
+      <div class="controls">
+        <div class="ctrl-group"><label for="ng-prefix">输入前一个词</label>
+          <input type="text" id="ng-prefix" value="我" placeholder="例如：我 / 机器 / 学习"></div>
+        <button class="btn primary" id="ng-predict">预测下一个词</button>
+        <button class="btn primary" id="ng-gen">随机生成一句话</button>
+      </div>
+      <div id="ng-pred"></div>
+      <div class="gen-sent" id="ng-genout" style="margin-top:10px">生成结果会显示在这里</div>
+      <div class="demo-info" id="ng-info"></div>
+    </div>
+
+    <div class="takeaway"><span class="tag">本章小结</span>
+      <ul>
+        <li>语言模型给句子打概率；链式法则拆解 + 马尔可夫假设截断 = N-gram。</li>
+        <li>Bigram 概率就是「数数 + 除法」，加一平滑兜底没见过的组合。</li>
+        <li>困惑度越低模型越好；「预测下一个词」就是「生成文本」——GPT 就是超大号的 N-gram。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ======================= 第六章：词向量 ======================= -->
+  <section class="chapter" id="sec6">
+    <h2><span class="chapter-no">6</span>词向量：让机器「看见」语义</h2>
+    <p class="chapter-sub">Word Embeddings · Word2Vec</p>
+
+    <p>还记得独热编码的问题吗——「猫」和「狗」的相似度与「猫」和「苹果」一样。词向量（<span class="en">Word Embedding</span>，也叫词嵌入）把每个词表示成一个<strong>稠密、低维、连续</strong>的向量（比如 300 维），让<strong>语义相近的词在向量空间里挨得近</strong>。</p>
+
+    <h3>6.1 分布式假设：看一个词交什么朋友</h3>
+    <p>语言学名言：<em>「You shall know a word by the company it keeps」</em>（观其伴而知其词）。分布式假设（<span class="en">Distributional Hypothesis</span>）认为：<strong>上下文相似的词，语义也相似</strong>。「猫」和「狗」前面的动词总是「喂、遛、养」——于是它们的向量自然靠近。词向量不是人定义的，而是从大量文本中「统计」出来的。</p>
+
+    <h3>6.2 Word2Vec：两个经典结构</h3>
+    <p>Word2Vec（2013，Google）用浅层神经网络在大语料上训练词向量，两种结构互为镜像：</p>
+    <div class="demo" style="padding:8px">
+      <svg viewBox="0 0 680 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CBOW 与 Skip-gram 示意" style="width:100%;height:auto">
+        <text x="170" y="24" text-anchor="middle" font-size="14" font-weight="700" fill="#0f766e">CBOW：上下文 → 预测中心词</text>
+        <text x="510" y="24" text-anchor="middle" font-size="14" font-weight="700" fill="#0e7490">Skip-gram：中心词 → 预测上下文</text>
+        <!-- CBOW 左侧上下文词 -->
+        <circle cx="60" cy="70" r="18" fill="#ccfbf1" stroke="#0d9488"/><text x="60" y="75" text-anchor="middle" font-size="12">猫</text>
+        <circle cx="60" cy="130" r="18" fill="#ccfbf1" stroke="#0d9488"/><text x="60" y="135" text-anchor="middle" font-size="12">在</text>
+        <circle cx="60" cy="190" r="18" fill="#ccfbf1" stroke="#0d9488"/><text x="60" y="195" text-anchor="middle" font-size="12">追</text>
+        <!-- CBOW 中心 -->
+        <rect x="150" y="100" width="90" height="50" rx="10" fill="#f0fdfa" stroke="#0d9488"/>
+        <text x="195" y="130" text-anchor="middle" font-size="13" font-weight="700">求和/平均</text>
+        <circle cx="310" cy="125" r="22" fill="#99f6e4" stroke="#0f766e" stroke-width="2"/>
+        <text x="310" y="130" text-anchor="middle" font-size="13" font-weight="700">狗</text>
+        <line x1="78" y1="70" x2="150" y2="112" stroke="#94a3b8" stroke-width="1.5"/>
+        <line x1="78" y1="130" x2="150" y2="125" stroke="#94a3b8" stroke-width="1.5"/>
+        <line x1="78" y1="190" x2="150" y2="138" stroke="#94a3b8" stroke-width="1.5"/>
+        <line x1="240" y1="125" x2="288" y2="125" stroke="#94a3b8" stroke-width="1.5"/>
+        <!-- Skip-gram 中心词 -->
+        <circle cx="400" cy="125" r="22" fill="#cffafe" stroke="#0e7490" stroke-width="2"/>
+        <text x="400" y="130" text-anchor="middle" font-size="13" font-weight="700">狗</text>
+        <!-- Skip-gram 右侧上下文词 -->
+        <circle cx="500" cy="70" r="18" fill="#e0f2fe" stroke="#0e7490"/><text x="500" y="75" text-anchor="middle" font-size="12">猫</text>
+        <circle cx="500" cy="130" r="18" fill="#e0f2fe" stroke="#0e7490"/><text x="500" y="135" text-anchor="middle" font-size="12">在</text>
+        <circle cx="500" cy="190" r="18" fill="#e0f2fe" stroke="#0e7490"/><text x="500" y="195" text-anchor="middle" font-size="12">追</text>
+        <line x1="422" y1="125" x2="482" y2="70" stroke="#94a3b8" stroke-width="1.5"/>
+        <line x1="422" y1="125" x2="482" y2="130" stroke="#94a3b8" stroke-width="1.5"/>
+        <line x1="422" y1="125" x2="482" y2="190" stroke="#94a3b8" stroke-width="1.5"/>
+        <circle cx="570" cy="70" r="18" fill="#e0f2fe" stroke="#0e7490"/><text x="570" y="75" text-anchor="middle" font-size="12">跑</text>
+        <circle cx="570" cy="130" r="18" fill="#e0f2fe" stroke="#0e7490"/><text x="570" y="135" text-anchor="middle" font-size="12">的</text>
+        <line x1="518" y1="70" x2="552" y2="70" stroke="#94a3b8" stroke-width="1.5"/>
+        <line x1="518" y1="130" x2="552" y2="130" stroke="#94a3b8" stroke-width="1.5"/>
+        <line x1="518" y1="190" x2="552" y2="190" stroke="#94a3b8" stroke-width="1.5"/>
+        <circle cx="570" cy="190" r="18" fill="#e0f2fe" stroke="#0e7490"/><text x="570" y="195" text-anchor="middle" font-size="12">猫</text>
+      </svg>
+    </div>
+    <p>训练目标：Skip-gram 用中心词预测窗口内的上下文词，输出层做 Softmax 分类。词表太大（几十万）时 Softmax 太慢，实际用<strong>负采样</strong>（<span class="en">Negative Sampling</span>，只随机抽几个「反例」词来训）提速。</p>
+
+    <h3>6.3 词向量的神奇性质：向量算术</h3>
+    <p>词向量最著名的性质：<strong>语义关系 ≈ 向量方向的差</strong>。经典结论：</p>
+    <div class="formula">
+      <span class="fn">词向量类比（Word Analogy）：</span>
+      vec(国王) − vec(男人) + vec(女人) ≈ vec(王后)
+    </div>
+    <p>「国王 − 男人」抽出了「王权/性别」的方向向量，把它加到「女人」上就得到「王后」。同样的方向差可以迁移：「北京 − 中国 + 日本 ≈ 东京」（首都方向）。这说明模型确实「学懂」了关系结构。</p>
+
+    <h3>6.4 动手玩：词向量空间</h3>
+    <div class="demo">
+      <p class="demo-title">演示 5 · 词向量空间可视化（2D 降维投影）</p>
+      <p class="demo-tip">真实词向量有几百维，这里用 2D 投影示意其结构：同色=同类词（动物/水果/城市/人物/动作/科技/自然），距离近=语义近。<strong>点击任意词</strong>看它的最近邻；先在右侧选一个「类比对」（如 国王→王后），再点任意词，系统计算「A − B + C」落在哪个词附近——这就是词向量类比。</p>
+      <div class="wordviz-side">
+        <div>
+          <canvas id="wv-canvas" style="height:440px"></canvas>
+          <div class="wordviz-legend" id="wv-legend"></div>
+        </div>
+        <div>
+          <div class="controls" style="margin-top:0">
+            <div class="ctrl-group"><label>类比对 A→B</label></div>
+          </div>
+          <div class="controls" style="margin-top:6px" id="wv-pairs">
+            <button class="btn on" data-pair="0">国王→王后</button>
+            <button class="btn" data-pair="1">北京→上海</button>
+            <button class="btn" data-pair="2">猫→狗</button>
+            <button class="btn" data-pair="3">跑步→游泳</button>
+          </div>
+          <div class="demo-info" id="wv-info">点击左侧画布上的词开始探索……</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notice"><span class="tag">进阶</span>Word2Vec 是<strong>静态词向量</strong>：一个词永远同一个向量，无法区分「苹果公司」和「苹果水果」。BERT 之后的<strong>上下文词向量</strong>（<span class="en">Contextual Embedding</span>）让同一个词在不同句子里有不同的向量，彻底解决了多义词问题。</div>
+
+    <div class="takeaway"><span class="tag">本章小结</span>
+      <ul>
+        <li>词向量把语义编码进几何空间：语义近 → 距离近，关系 ≈ 向量差。</li>
+        <li>训练依据是分布式假设：上下文相似的词语义相似（CBOW / Skip-gram）。</li>
+        <li>词向量类比（国王−男人+女人≈王后）是「模型理解语义」的经典证据。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ======================= 第七章：序列模型 ======================= -->
+  <section class="chapter" id="sec7">
+    <h2><span class="chapter-no">7</span>序列模型：RNN 与 LSTM</h2>
+    <p class="chapter-sub">Recurrent Neural Networks · LSTM</p>
+
+    <p>文本是<strong>变长的序列</strong>，词序携带信息（「猫追狗」≠「狗追猫」）。普通前馈网络要求固定长度的输入，也没法处理「第 3 个词影响第 30 个词」的长距离关系。循环神经网络（<span class="en">Recurrent Neural Network</span>，RNN）为此而生。</p>
+
+    <h3>7.1 RNN：带记忆的循环</h3>
+    <p>RNN 的核心：一个细胞单元（<span class="en">Cell</span>）不仅吃当前输入，还吃<strong>自己上一步的状态</strong>——按时间展开后是一条链：</p>
+    <div class="demo" style="padding:8px">
+      <svg viewBox="0 0 680 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RNN 按时间展开示意" style="width:100%;height:auto">
+        <text x="340" y="24" text-anchor="middle" font-size="14" font-weight="700" fill="#0f766e">RNN 按时间展开（同一个细胞被反复使用）</text>
+        <!-- 三个细胞 -->
+        <rect x="60" y="90" width="120" height="70" rx="12" fill="#ccfbf1" stroke="#0d9488" stroke-width="2"/>
+        <text x="120" y="120" text-anchor="middle" font-size="13" font-weight="700">细胞 A</text>
+        <text x="120" y="140" text-anchor="middle" font-size="12" fill="#475569">h(t−1)</text>
+        <rect x="280" y="90" width="120" height="70" rx="12" fill="#99f6e4" stroke="#0f766e" stroke-width="2"/>
+        <text x="340" y="120" text-anchor="middle" font-size="13" font-weight="700">细胞 A</text>
+        <text x="340" y="140" text-anchor="middle" font-size="12" fill="#475569">h(t)</text>
+        <rect x="500" y="90" width="120" height="70" rx="12" fill="#ccfbf1" stroke="#0d9488" stroke-width="2"/>
+        <text x="560" y="120" text-anchor="middle" font-size="13" font-weight="700">细胞 A</text>
+        <text x="560" y="140" text-anchor="middle" font-size="12" fill="#475569">h(t+1)</text>
+        <!-- 循环箭头 -->
+        <line x1="180" y1="125" x2="280" y2="125" stroke="#0f766e" stroke-width="2" marker-end="url(#arr)"/>
+        <line x1="400" y1="125" x2="500" y2="125" stroke="#0f766e" stroke-width="2" marker-end="url(#arr)"/>
+        <!-- 输入 -->
+        <circle cx="120" cy="40" r="16" fill="#e0f2fe" stroke="#0e7490"/><text x="120" y="45" text-anchor="middle" font-size="11">x(t−1)</text>
+        <circle cx="340" cy="40" r="16" fill="#e0f2fe" stroke="#0e7490"/><text x="340" y="45" text-anchor="middle" font-size="11">x(t)</text>
+        <circle cx="560" cy="40" r="16" fill="#e0f2fe" stroke="#0e7490"/><text x="560" y="45" text-anchor="middle" font-size="11">x(t+1)</text>
+        <line x1="120" y1="56" x2="120" y2="90" stroke="#0e7490" stroke-width="1.5"/>
+        <line x1="340" y1="56" x2="340" y2="90" stroke="#0e7490" stroke-width="1.5"/>
+        <line x1="560" y1="56" x2="560" y2="90" stroke="#0e7490" stroke-width="1.5"/>
+        <!-- 输出 -->
+        <circle cx="120" cy="200" r="16" fill="#dcfce7" stroke="#16a34a"/><text x="120" y="205" text-anchor="middle" font-size="11">y(t−1)</text>
+        <circle cx="340" cy="200" r="16" fill="#dcfce7" stroke="#16a34a"/><text x="340" y="205" text-anchor="middle" font-size="11">y(t)</text>
+        <circle cx="560" cy="200" r="16" fill="#dcfce7" stroke="#16a34a"/><text x="560" y="205" text-anchor="middle" font-size="11">y(t+1)</text>
+        <line x1="120" y1="160" x2="120" y2="184" stroke="#16a34a" stroke-width="1.5"/>
+        <line x1="340" y1="160" x2="340" y2="184" stroke="#16a34a" stroke-width="1.5"/>
+        <line x1="560" y1="160" x2="560" y2="184" stroke="#16a34a" stroke-width="1.5"/>
+        <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0f766e"/></marker></defs>
+      </svg>
+    </div>
+    <div class="formula">
+      <span class="fn">RNN 的更新公式（Wₕ 是「记忆」权重，三步共享同一组参数）：</span>
+      <i>h<sub>t</sub></i> = tanh( <i>W<sub>x</sub></i>·<i>x<sub>t</sub></i> + <i>W<sub>h</sub></i>·<i>h</i><sub>t−1</sub> + <i>b</i> )
+    </div>
+    <p>每个时刻的隐藏状态 hₜ 是「到目前为止读到的内容」的压缩记忆。训练时梯度沿时间链回传（<span class="en">Backpropagation Through Time</span>，BPTT），链一长梯度连乘会指数级衰减——<strong>梯度消失</strong>（<span class="en">Vanishing Gradient</span>）：第 30 个词的错误几乎传不回第 3 个词。</p>
+
+    <h3>7.2 LSTM：给记忆装上「闸门」</h3>
+    <p>长短时记忆网络（<span class="en">Long Short-Term Memory</span>，LSTM）解决长距离遗忘问题。它有一条贯穿始终的「传送带」——细胞状态（<span class="en">Cell State</span>），三扇门（<span class="en">Gate</span>）决定信息的去留：</p>
+    <table class="tb">
+      <tr><th>门</th><th>英文</th><th>作用</th><th>类比</th></tr>
+      <tr><td>遗忘门</td><td><span class="en">Forget Gate</span></td><td>决定丢掉旧记忆的哪些部分</td><td>清理过时的笔记</td></tr>
+      <tr><td>输入门</td><td><span class="en">Input Gate</span></td><td>决定把新信息的哪些部分写进记忆</td><td>摘抄新要点</td></tr>
+      <tr><td>输出门</td><td><span class="en">Output Gate</span></td><td>决定此刻输出记忆的哪些部分</td><td>发言时调用笔记</td></tr>
+    </table>
+    <p>门 = 一个 Sigmoid（输出 0~1）× 一条信息流，0 关 1 开。因为乘法链上有了「选择性放行」，梯度可以畅通地传播很远。</p>
+
+    <h3>7.3 Seq2Seq：序列到序列</h3>
+    <p>机器翻译需要「吃一句话，吐另一句话」。序列到序列模型（<span class="en">Sequence to Sequence</span>，Seq2Seq）用两个 RNN：编码器（<span class="en">Encoder</span>）把输入句子压成一个固定长度的「上下文向量」，解码器（<span class="en">Decoder</span>）再从这个向量逐词生成译文：</p>
+    <div class="demo" style="padding:8px">
+      <svg viewBox="0 0 720 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Seq2Seq 编码器解码器示意" style="width:100%;height:auto">
+        <!-- 编码器 -->
+        <rect x="30" y="60" width="90" height="50" rx="10" fill="#ccfbf1" stroke="#0d9488"/>
+        <text x="75" y="90" text-anchor="middle" font-size="12">我</text>
+        <rect x="140" y="60" width="90" height="50" rx="10" fill="#ccfbf1" stroke="#0d9488"/>
+        <text x="185" y="90" text-anchor="middle" font-size="12">爱</text>
+        <rect x="250" y="60" width="90" height="50" rx="10" fill="#99f6e4" stroke="#0f766e" stroke-width="2"/>
+        <text x="295" y="90" text-anchor="middle" font-size="12">NLP</text>
+        <line x1="120" y1="85" x2="140" y2="85" stroke="#0f766e" stroke-width="2"/>
+        <line x1="230" y1="85" x2="250" y2="85" stroke="#0f766e" stroke-width="2"/>
+        <text x="180" y="40" text-anchor="middle" font-size="13" font-weight="700" fill="#0f766e">编码器 Encoder</text>
+        <!-- 上下文向量 -->
+        <rect x="380" y="62" width="70" height="46" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+        <text x="415" y="80" text-anchor="middle" font-size="11" fill="#92400e">上下文</text>
+        <text x="415" y="96" text-anchor="middle" font-size="11" fill="#92400e">向量 c</text>
+        <line x1="340" y1="85" x2="380" y2="85" stroke="#d97706" stroke-width="2"/>
+        <!-- 解码器 -->
+        <rect x="490" y="60" width="90" height="50" rx="10" fill="#ffedd5" stroke="#ea580c"/>
+        <text x="535" y="90" text-anchor="middle" font-size="12">I</text>
+        <rect x="600" y="60" width="90" height="50" rx="10" fill="#ffedd5" stroke="#ea580c"/>
+        <text x="645" y="90" text-anchor="middle" font-size="12">love</text>
+        <line x1="450" y1="85" x2="490" y2="85" stroke="#d97706" stroke-width="2"/>
+        <line x1="580" y1="85" x2="600" y2="85" stroke="#ea580c" stroke-width="2"/>
+        <text x="545" y="40" text-anchor="middle" font-size="13" font-weight="700" fill="#ea580c">解码器 Decoder</text>
+        <!-- 输出提示 -->
+        <rect x="600" y="130" width="90" height="26" rx="6" fill="#fff" stroke="#ea580c" stroke-dasharray="4 3"/>
+        <text x="645" y="147" text-anchor="middle" font-size="11" fill="#9a3412">NLP → …</text>
+        <line x1="645" y1="110" x2="645" y2="130" stroke="#ea580c" stroke-width="1.5" stroke-dasharray="4 3"/>
+      </svg>
+    </div>
+    <p>Seq2Seq 的瓶颈：无论输入多长，都要塞进一个固定大小的向量 c——长句子会「装不下、记不住」。下一章的注意力机制就是来解决这个问题的。</p>
+
+    <div class="takeaway"><span class="tag">本章小结</span>
+      <ul>
+        <li>RNN 用循环结构处理变长序列，按时间展开 = 同参数反复使用。</li>
+        <li>长序列训练会遇到梯度消失；LSTM 用三门（遗忘/输入/输出）保护长距离记忆。</li>
+        <li>Seq2Seq = 编码器压缩 + 解码器生成，固定向量是它的瓶颈。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ======================= 第八章：注意力与 Transformer ======================= -->
+  <section class="chapter" id="sec8">
+    <h2><span class="chapter-no">8</span>注意力机制与 Transformer：NLP 的转折点</h2>
+    <p class="chapter-sub">Attention · Transformer</p>
+
+    <h3>8.1 注意力：让模型学会「看哪里」</h3>
+    <p>人类翻译长句时不会把整句话背下来再翻译，而是<strong>每写一个词，回头看一眼相关的原文位置</strong>。注意力机制（<span class="en">Attention Mechanism</span>）把这个直觉做成数学：对每个输出位置，用「查询」在所有「键」上打分，Softmax 归一化成权重，再对「值」做加权平均。</p>
+    <div class="analogy"><span class="tag">通俗理解</span>
+      查字典（查询 query）时，你把问题（Q）和所有词条（键 key）比对，找到最相关的那几条，然后集中读它们的解释（值 value）。权重越大的位置，读得越仔细。
+    </div>
+    <div class="formula">
+      <span class="fn">注意力公式（√d 用于防止点积过大导致 Softmax 饱和）：</span>
+      Attention(<i>Q</i>, <i>K</i>, <i>V</i>) = softmax( <span class="frac"><span class="num"><i>QK</i><sup>T</sup></span><span class="den">&#8730;<i>d<sub>k</sub></i></span></span> ) · <i>V</i>
+    </div>
+    <ul>
+      <li><strong>Q 查询 Query</strong>：我现在想找什么？</li>
+      <li><strong>K 键 Key</strong>：每个位置「是什么」（供比对）。</li>
+      <li><strong>V 值 Value</strong>：每个位置「有什么」（被加权取走的内容）。</li>
+    </ul>
+    <p><strong>自注意力</strong>（<span class="en">Self-Attention</span>）里 Q、K、V 都来自同一句话：每个词和句子里所有词两两打分——「它」指代谁、「bank」是银行还是河岸，全靠这些分数决定。</p>
+
+    <h3>8.2 动手玩：翻译中的注意力</h3>
+    <div class="demo">
+      <p class="demo-title">演示 6 · 注意力矩阵：翻译时每个词在看哪里</p>
+      <p class="demo-tip">把 "The cat sat on the mat" 翻译成「猫 坐 在 垫子 上」。点击任意一个<strong>目标词</strong>（行），看它对每个源词分配的注意力权重（颜色越深权重越大，右侧显示 Softmax 的计算过程）。</p>
+      <div class="att-grid" id="att-grid"></div>
+      <div class="demo-info" id="att-info">点击上方表格的任意一行查看计算过程</div>
+    </div>
+
+    <h3>8.3 Transformer：注意力 = 一切</h3>
+    <p>2017 年的论文《Attention Is All You Need》提出 Transformer，彻底抛弃 RNN 的串行循环，整个网络由<strong>多头自注意力</strong>（<span class="en">Multi-Head Attention</span>）和前馈网络堆叠而成。三大优势：</p>
+    <ul>
+      <li><strong>并行训练</strong>：RNN 必须一个词接一个词地算；Transformer 全句同时算，训练快得多。</li>
+      <li><strong>长距离无障碍</strong>：任意两个词直接「对话」，距离恒为 1 步，没有梯度消失。</li>
+      <li><strong>可扩展性</strong>：堆更多层、更大数据，性能持续增长——GPT 从 1.1 亿参数长到万亿参数，靠的就是这个架构。</li>
+    </ul>
+    <div class="demo" style="padding:8px">
+      <svg viewBox="0 0 500 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Transformer 简化结构" style="width:100%;max-width:460px;margin:0 auto;display:block">
+        <rect x="120" y="20" width="260" height="44" rx="10" fill="#e0f2fe" stroke="#0e7490"/>
+        <text x="250" y="47" text-anchor="middle" font-size="13" font-weight="700" fill="#0c4a6e">词向量 + 位置编码</text>
+        <rect x="90" y="100" width="320" height="200" rx="14" fill="none" stroke="#94a3b8" stroke-dasharray="6 5"/>
+        <text x="100" y="122" font-size="12" fill="#64748b">Transformer Block（× N 层）</text>
+        <rect x="130" y="140" width="240" height="48" rx="10" fill="#ccfbf1" stroke="#0d9488" stroke-width="2"/>
+        <text x="250" y="162" text-anchor="middle" font-size="13" font-weight="700" fill="#0f766e">多头自注意力</text>
+        <text x="250" y="180" text-anchor="middle" font-size="11" fill="#475569">Multi-Head Self-Attention</text>
+        <rect x="130" y="230" width="240" height="48" rx="10" fill="#ccfbf1" stroke="#0d9488" stroke-width="2"/>
+        <text x="250" y="252" text-anchor="middle" font-size="13" font-weight="700" fill="#0f766e">前馈网络</text>
+        <text x="250" y="270" text-anchor="middle" font-size="11" fill="#475569">Feed-Forward Network</text>
+        <line x1="250" y1="64" x2="250" y2="140" stroke="#0e7490" stroke-width="2"/>
+        <line x1="250" y1="188" x2="250" y2="230" stroke="#0d9488" stroke-width="2"/>
+        <line x1="250" y1="278" x2="250" y2="330" stroke="#0d9488" stroke-width="2"/>
+        <rect x="120" y="330" width="260" height="44" rx="10" fill="#dcfce7" stroke="#16a34a"/>
+        <text x="250" y="357" text-anchor="middle" font-size="13" font-weight="700" fill="#166534">输出层（Softmax 预测下一个词）</text>
+      </svg>
+    </div>
+    <p>两个细节：① 注意力本身对词序不敏感，所以要<strong>位置编码</strong>（<span class="en">Positional Encoding</span>）把「第几个词」的信息加进输入；② 「多头」= 把注意力拆成多个子空间并行计算（有的头管语法、有的头管指代……各看各的，最后拼接）。</p>
+
+    <div class="notice"><span class="tag">历史地位</span>Transformer 之后诞生了两大家族：<strong>BERT</strong>（双向编码器，擅长理解）和 <strong>GPT</strong>（单向解码器，擅长生成）。今天几乎所有大模型都是 Transformer 的变体——「Attention Is All You Need」名副其实。</div>
+
+    <div class="takeaway"><span class="tag">本章小结</span>
+      <ul>
+        <li>注意力 = Q 和 K 打分 + Softmax + 对 V 加权平均，让模型动态「看重点」。</li>
+        <li>自注意力让句子内部词与词直接两两交互，解决长距离依赖。</li>
+        <li>Transformer 用纯注意力架构实现并行训练、无限扩展，是当代 NLP 的地基。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ======================= 第九章：预训练大模型 ======================= -->
+  <section class="chapter" id="sec9">
+    <h2><span class="chapter-no">9</span>预训练大模型时代：GPT 是怎么来的</h2>
+    <p class="chapter-sub">Pre-trained Language Models · LLMs</p>
+
+    <h3>9.1 核心思想：先「读万卷书」，再「干一行」</h3>
+    <p>传统做法是每个任务从零训练一个模型，标注数据又贵又少。预训练（<span class="en">Pre-training</span>）的思路：先在海量无标注文本上训练一个<strong>通用语言模型</strong>（读遍全网文本，学会语法、常识、推理的统计规律），再针对具体任务<strong>微调</strong>（<span class="en">Fine-tuning</span>）或直接<strong>提示</strong>（<span class="en">Prompting</span>）。就像先上完基础教育，再学一门手艺——基础越扎实，学手艺越快。</p>
+
+    <h3>9.2 两大预训练范式</h3>
+    <table class="tb">
+      <tr><th></th><th>掩码语言模型（BERT 路线）</th><th>自回归语言模型（GPT 路线）</th></tr>
+      <tr><td>英文</td><td><span class="en">Masked Language Model</span>（MLM）</td><td><span class="en">Autoregressive LM</span>（因果 LM）</td></tr>
+      <tr><td>训练任务</td><td>把句子里一些词挖掉，让模型「完形填空」</td><td>只给前文，让模型「预测下一个词」</td></tr>
+      <tr><td>看上下文</td><td>双向（前后都能看）</td><td>单向（只能看左边）</td></tr>
+      <tr><td>擅长</td><td>理解类任务：分类、抽取、检索</td><td>生成类任务：写作、对话、代码</td></tr>
+      <tr><td>代表</td><td>BERT、RoBERTa</td><td>GPT-1/2/3/4、LLaMA、Qwen、DeepSeek</td></tr>
+    </table>
+    <p>一个经典例子（完形填空）：「今天天气很___，我们去公园野餐吧」→ 模型根据上下文填「好」。GPT 式的训练则是不给空格，只给「今天天气很」，让模型猜下一个字——猜得越准，学到的知识越多。</p>
+
+    <h3>9.3 从语言模型到 ChatGPT 的三级火箭</h3>
+    <div class="pipeline">
+      <div class="pipe-step"><b>第一级：预训练</b>海量文本上<br>「预测下一个词」</div>
+      <div class="pipe-arrow">&#8594;</div>
+      <div class="pipe-step"><b>第二级：指令微调</b>人工问答示范<br>Instruction Tuning</div>
+      <div class="pipe-arrow">&#8594;</div>
+      <div class="pipe-step"><b>第三级：人类反馈</b>RLHF 对齐人类偏好</div>
+    </div>
+    <ul>
+      <li><strong>预训练</strong>让模型「什么都知道一点」，但它只会续写，不会「回答问题」。</li>
+      <li><strong>指令微调</strong>（<span class="en">Instruction Tuning</span>）：用「问题→答案」的示范数据训练，教会模型「听懂人话、按指令办事」。</li>
+      <li><strong>RLHF</strong>（<span class="en">Reinforcement Learning from Human Feedback</span>，基于人类反馈的强化学习）：让人对多个回答排序打分，模型学习「有用的、诚实的、无害的」回答偏好——这就是 ChatGPT 比原始 GPT-3 好用得多的关键。</li>
+    </ul>
+
+    <h3>9.4 几个你必须知道的概念</h3>
+    <table class="tb">
+      <tr><th>概念</th><th>英文</th><th>一句话解释</th></tr>
+      <tr><td>词元</td><td><span class="en">Token</span></td><td>模型读写的最小单元。中文约 1 个字≈1 个 token，英文约 0.75 个词≈1 个 token；GPT 的「上下文窗口」以 token 计</td></tr>
+      <tr><td>词嵌入层</td><td><span class="en">Embedding</span></td><td>把 token 编号映射成高维向量（第 6 章词向量的现代版），是大模型的「词典」</td></tr>
+      <tr><td>参数规模</td><td><span class="en">Parameters</span></td><td>模型可学习数字的个数：GPT-3 约 1750 亿。规模法则（<span class="en">Scaling Law</span>）：数据、参数、算力同涨，能力涌现式增强</td></tr>
+      <tr><td>温度采样</td><td><span class="en">Temperature Sampling</span></td><td>控制生成的随机性：温度低=保守精准，温度高=天马行空</td></tr>
+      <tr><td>幻觉</td><td><span class="en">Hallucination</span></td><td>模型一本正经地编造不存在的事实——因为它的本质是「概率续写」而非「查数据库」</td></tr>
+      <tr><td>上下文窗口</td><td><span class="en">Context Window</span></td><td>一次能塞进模型的文本上限，超出部分会被遗忘</td></tr>
+      <tr><td>RAG</td><td><span class="en">Retrieval-Augmented Generation</span></td><td>先检索相关资料再生成答案，缓解幻觉、接入私有知识</td></tr>
+    </table>
+
+    <div class="takeaway"><span class="tag">本章小结</span>
+      <ul>
+        <li>预训练（海量文本预测下一个词/完形填空）→ 微调/提示，是大模型范式。</li>
+        <li>BERT 双向重理解，GPT 单向重生成；ChatGPT = 预训练 + 指令微调 + RLHF。</li>
+        <li>本质仍是「语言模型」：概率续写。幻觉、随机性都源于此。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ======================= 第十章：NLP 评估 ======================= -->
+  <section class="chapter" id="sec10">
+    <h2><span class="chapter-no">10</span>NLP 任务怎么打分</h2>
+    <p class="chapter-sub">Evaluation Metrics</p>
+
+    <h3>10.1 分类任务：沿用经典指标</h3>
+    <p>文本分类（垃圾邮件、情感分析）直接用混淆矩阵与精确率/召回率/F1（同机器学习课第 12 章）。类别不平衡时优先 F1，而不是准确率。</p>
+
+    <h3>10.2 生成任务：BLEU 与 ROUGE</h3>
+    <p>翻译和摘要的「标准答案」不止一种，逐字比对太苛刻。BLEU（<span class="en">Bilingual Evaluation Understudy</span>）的思路：统计机器译文里有多少 n 元词组（n-gram）也出现在参考译文中，再乘一个惩罚翻译过短的系数：</p>
+    <div class="formula">
+      <span class="fn">BLEU（简化版；pₙ 是 n-gram 精确率，BP 惩罚过短译文，r 参考长度 / c 候选长度）：</span>
+      BLEU = <i>BP</i> · exp( <span class="sigma"><span class="slim"><span>4</span><span>n=1</span></span><span class="sg">Σ</span></span> <span class="frac"><span class="num">1</span><span class="den">4</span></span> ln <i>p<sub>n</sub></i> )&nbsp;&nbsp;&nbsp; <i>BP</i> = min(1, <i>e</i><sup>1−r/c</sup>)
+    </div>
+    <ul>
+      <li>BLEU：偏重<strong>精确率</strong>（机器说的词有多少是对的），机器翻译标配。</li>
+      <li>ROUGE（<span class="en">Recall-Oriented Understudy for Gisting Evaluation</span>）：偏重<strong>召回率</strong>（标准摘要里的要点被覆盖了多少），文本摘要常用。</li>
+    </ul>
+
+    <h3>10.3 语言模型：困惑度</h3>
+    <p>语言模型用困惑度（<span class="en">Perplexity</span>，第 5 章）：模型对测试文本越「不惊讶」，PPL 越低。GPT-2 在英文维基上 PPL ≈ 18，意思是平均每个词像从 18 个候选里猜。</p>
+
+    <h3>10.4 大模型时代的新玩法</h3>
+    <ul>
+      <li><strong>LLM-as-a-Judge</strong>：用一个强模型给另一个模型的回答打分（一致性、帮助性、安全性），逐渐成为主流。</li>
+      <li><strong>人工评测</strong>：仍然最可靠也最贵；排行榜（如 Chatbot Arena 的 Elo 评分）用群众投票给模型排名。</li>
+      <li><strong>任务匹配第一原则</strong>：指标必须和业务目标一致——客服场景更怕「答错」（看精确率），推荐场景更怕「漏推」（看召回率）。</li>
+    </ul>
+
+    <div class="takeaway"><span class="tag">本章小结</span>
+      <ul>
+        <li>分类看 F1；翻译看 BLEU（精确率导向）；摘要看 ROUGE（召回率导向）。</li>
+        <li>语言模型看困惑度（越低越好）。</li>
+        <li>生成质量最终要人来把关，指标只是辅助筛选。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ======================= 第十一章：实战与路线 ======================= -->
+  <section class="chapter" id="sec11">
+    <h2><span class="chapter-no">11</span>实战案例与学习路线</h2>
+    <p class="chapter-sub">Hands-on · Roadmap</p>
+
+    <h3>11.1 案例一：中文情感分析（经典机器学习，20 行搞定）</h3>
+    <p>用 jieba 分词 + sklearn 的 TF-IDF + 朴素贝叶斯做电影评论情感分类。安装：<code>pip install jieba scikit-learn</code></p>
+    <div class="code"><span class="cm"># 用本课第 2、3、4 章的知识做情感分析</span>
+<span class="kw">import</span> jieba
+<span class="kw">from</span> sklearn.feature_extraction.text <span class="kw">import</span> TfidfVectorizer
+<span class="kw">from</span> sklearn.naive_bayes <span class="kw">import</span> MultinomialNB
+<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> train_test_split
+
+<span class="cm"># 1. 数据：评论 + 标签（1=好评，0=差评）</span>
+texts = [<span class="cap">"太好看了 剧情紧凑 演员演技在线"</span>, <span class="cap">"特效炸裂 值得二刷"</span>,
+         <span class="cap">"烂片一部 浪费时间"</span>, <span class="cap">"剧情拖沓 看到睡着"</span>] * <span class="num">20</span>
+labels = [<span class="num">1</span>, <span class="num">1</span>, <span class="num">0</span>, <span class="num">0</span>] * <span class="num">20</span>
+
+<span class="cm"># 2. 分词 + TF-IDF 向量化（tokenizer=jieba 让 sklearn 用中文分词）</span>
+vec = TfidfVectorizer(tokenizer=jieba.lcut)
+X = vec.fit_transform(texts)
+
+<span class="cm"># 3. 朴素贝叶斯训练 + 评估</span>
+X_tr, X_te, y_tr, y_te = train_test_split(X, labels, test_size=<span class="num">0.25</span>)
+model = MultinomialNB().fit(X_tr, y_tr)
+<span class="fnc">print</span>(<span class="cap">"准确率:"</span>, model.score(X_te, y_te))
+
+<span class="cm"># 4. 预测新评论</span>
+<span class="fnc">print</span>(model.predict(vec.transform([<span class="cap">"画面精美 值得一看"</span>])))  <span class="cm"># 期望 [1]</span></div>
+
+    <h3>11.2 案例二：调用大模型（8 行代码）</h3>
+    <p>安装：<code>pip install transformers torch</code>（首次运行会下载模型权重）。</p>
+    <div class="code"><span class="cm"># 用 Hugging Face transformers 调用中文对话模型</span>
+<span class="kw">from</span> transformers <span class="kw">import</span> pipeline
+
+<span class="cm"># 情感分析（BERT 系预训练模型）</span>
+sa = pipeline(<span class="cap">"sentiment-analysis"</span>, model=<span class="cap">"uer/roberta-base-finetuned-jd-binary-chinese"</span>)
+<span class="fnc">print</span>(sa(<span class="cap">"这款手机非常好用！"</span>))
+
+<span class="cm"># 文本生成（GPT 风格，中文小模型示例）</span>
+gen = pipeline(<span class="cap">"text-generation"</span>, model=<span class="cap">"uer/gpt2-chinese-cluecorpussmall"</span>)
+<span class="fnc">print</span>(gen(<span class="cap">"今天天气"</span>, max_length=<span class="num">30</span>))</div>
+    <p>提示：如果下载模型慢，可在 <code>~/.bashrc</code> 里设置镜像 <code>export HF_ENDPOINT=https://hf-mirror.com</code>。</p>
+
+    <h3>11.3 学习路线图</h3>
+    <div class="pipeline">
+      <div class="pipe-step"><b>编程</b>Python + NumPy<br>数据处理</div>
+      <div class="pipe-arrow">&#8594;</div>
+      <div class="pipe-step"><b>经典 NLP</b>本课全部内容<br>jieba / sklearn 实战</div>
+      <div class="pipe-arrow">&#8594;</div>
+      <div class="pipe-step"><b>深度学习 NLP</b>PyTorch<br>RNN/LSTM/Transformer</div>
+      <div class="pipe-arrow">&#8594;</div>
+      <div class="pipe-step"><b>大模型工程</b>微调/RAG/Agent<br>部署应用</div>
+    </div>
+    <p>推荐资源：吴恩达《NLP Specialization》入门、《Speech and Language Processing》（Jurafsky，开源教材，统计 NLP 圣经）、李沐《动手学深度学习》、Hugging Face 官方课程（大模型时代必学）。</p>
+
+    <h3>11.4 新手常见误区</h3>
+    <table class="tb">
+      <tr><th>误区</th><th>真相</th></tr>
+      <tr><td>「中文必须用 jieba 分词后才能进模型」</td><td>老一代模型（TF-IDF/BERT）需要；现代大模型自带分词器（BPE），把文本切成 token，不需要预先分词</td></tr>
+      <tr><td>「训练数据里没见过的词模型一定不会」</td><td>词向量时代靠子词（<span class="en">Subword</span>）拼装；大模型还能从上下文猜生僻词</td></tr>
+      <tr><td>「模型越大越好」</td><td>小任务用小模型更快更省；先把问题定义清楚、数据洗干净</td></tr>
+      <tr><td>「大模型什么都知道」</td><td>它会幻觉、知识有过期时间；关键场景用 RAG 检索 + 人工审核</td></tr>
+      <tr><td>「NLP = 调 ChatGPT API」</td><td>理解底层原理才能设计提示词、排查问题、评估效果——这正是本课的目的</td></tr>
+    </table>
+
+    <div class="takeaway"><span class="tag">本章小结</span>
+      <ul>
+        <li>经典路线：分词 → TF-IDF → 朴素贝叶斯/SVM，20 行代码可跑通。</li>
+        <li>现代路线：预训练模型 + 微调/提示；transformers 库是通用入口。</li>
+        <li>路线：Python → 经典 NLP → 深度学习 → 大模型工程，边学边做项目。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ======================= 附录：术语表 ======================= -->
+  <section class="chapter" id="glossary">
+    <h2><span class="chapter-no">附</span>中英术语速查表</h2>
+    <p class="chapter-sub">Glossary</p>
+
+    <table class="tb glossary">
+      <tr><th>中文</th><th>English</th><th>一句话解释</th></tr>
+      <tr><td>自然语言处理</td><td>Natural Language Processing (NLP)</td><td>让计算机理解与生成人类语言</td></tr>
+      <tr><td>自然语言理解</td><td>NLU</td><td>从文本中提取含义</td></tr>
+      <tr><td>自然语言生成</td><td>NLG</td><td>把含义写成文本</td></tr>
+      <tr><td>分词</td><td>Tokenization</td><td>把文本切成词元（token）</td></tr>
+      <tr><td>词元</td><td>Token</td><td>模型处理文本的最小单元</td></tr>
+      <tr><td>最大匹配</td><td>Maximum Matching</td><td>词典贪心匹配最长词的中文分词法</td></tr>
+      <tr><td>停用词</td><td>Stop Words</td><td>高频低信息词（的/了/the），常被过滤</td></tr>
+      <tr><td>词干提取</td><td>Stemming</td><td>规则砍后缀：running→run</td></tr>
+      <tr><td>词形还原</td><td>Lemmatization</td><td>查词典归原形：better→good</td></tr>
+      <tr><td>独热编码</td><td>One-hot Encoding</td><td>词表长度的 0/1 稀疏向量</td></tr>
+      <tr><td>词袋模型</td><td>Bag of Words (BoW)</td><td>只数词频、忽略词序的文档表示</td></tr>
+      <tr><td>词频</td><td>Term Frequency (TF)</td><td>词在文档中的相对频率</td></tr>
+      <tr><td>逆文档频率</td><td>IDF</td><td>惩罚到处出现的词：log(N/df)</td></tr>
+      <tr><td>TF-IDF</td><td>TF-IDF</td><td>词权重 = 词频 × 逆文档频率</td></tr>
+      <tr><td>余弦相似度</td><td>Cosine Similarity</td><td>向量夹角余弦，衡量文档相似</td></tr>
+      <tr><td>贝叶斯定理</td><td>Bayes' Theorem</td><td>P(A|B) = P(B|A)P(A)/P(B)</td></tr>
+      <tr><td>先验/后验概率</td><td>Prior / Posterior</td><td>看证据前 / 后的概率估计</td></tr>
+      <tr><td>朴素贝叶斯</td><td>Naive Bayes</td><td>假设特征条件独立的贝叶斯分类器</td></tr>
+      <tr><td>条件独立</td><td>Conditional Independence</td><td>给定类别后各词互不影响（朴素之处）</td></tr>
+      <tr><td>拉普拉斯平滑</td><td>Laplace Smoothing</td><td>计数 +1 防止零概率</td></tr>
+      <tr><td>语言模型</td><td>Language Model (LM)</td><td>给词序列打概率的模型</td></tr>
+      <tr><td>链式法则</td><td>Chain Rule</td><td>句子概率 = 条件概率连乘</td></tr>
+      <tr><td>马尔可夫假设</td><td>Markov Assumption</td><td>下一个词只依赖最近 n−1 个词</td></tr>
+      <tr><td>N-gram</td><td>N-gram</td><td>连续 n 个词的组合；语言模型按它计数</td></tr>
+      <tr><td>Bigram</td><td>Bigram</td><td>二元模型，只看前一个词</td></tr>
+      <tr><td>数据稀疏</td><td>Data Sparsity</td><td>语料有限，大量组合从未出现</td></tr>
+      <tr><td>平滑</td><td>Smoothing</td><td>给未出现事件分配小概率</td></tr>
+      <tr><td>困惑度</td><td>Perplexity (PPL)</td><td>语言模型「惊讶程度」，越低越好</td></tr>
+      <tr><td>分布式假设</td><td>Distributional Hypothesis</td><td>上下文相似的词，语义相似</td></tr>
+      <tr><td>词向量</td><td>Word Embedding</td><td>词的稠密向量表示，语义近则距离近</td></tr>
+      <tr><td>Word2Vec</td><td>Word2Vec</td><td>2013 年经典词向量训练方法</td></tr>
+      <tr><td>CBOW / Skip-gram</td><td>CBOW / Skip-gram</td><td>上下文预测中心词 / 中心词预测上下文</td></tr>
+      <tr><td>负采样</td><td>Negative Sampling</td><td>抽少量反例加速 Softmax 训练</td></tr>
+      <tr><td>词类比</td><td>Word Analogy</td><td>国王−男人+女人≈王后</td></tr>
+      <tr><td>上下文词向量</td><td>Contextual Embedding</td><td>同一个词在不同句子中向量不同</td></tr>
+      <tr><td>循环神经网络</td><td>RNN</td><td>带循环记忆的序列模型</td></tr>
+      <tr><td>梯度消失</td><td>Vanishing Gradient</td><td>长链反向传播时梯度指数衰减</td></tr>
+      <tr><td>长短时记忆</td><td>LSTM</td><td>带三门控的记忆单元，缓解长依赖</td></tr>
+      <tr><td>序列到序列</td><td>Seq2Seq</td><td>编码器-解码器架构（机器翻译）</td></tr>
+      <tr><td>注意力机制</td><td>Attention</td><td>softmax(QKᵀ/√d)·V，动态加权看重点</td></tr>
+      <tr><td>自注意力</td><td>Self-Attention</td><td>句子内部词与词两两交互</td></tr>
+      <tr><td>多头注意力</td><td>Multi-Head Attention</td><td>多个注意力子空间并行</td></tr>
+      <tr><td>Transformer</td><td>Transformer</td><td>2017 纯注意力架构，当代 NLP 地基</td></tr>
+      <tr><td>位置编码</td><td>Positional Encoding</td><td>给注意力补上词序信息</td></tr>
+      <tr><td>BERT</td><td>BERT</td><td>双向掩码预训练模型，擅长理解</td></tr>
+      <tr><td>GPT</td><td>GPT</td><td>自回归预训练模型，擅长生成</td></tr>
+      <tr><td>预训练 / 微调</td><td>Pre-training / Fine-tuning</td><td>先海量文本打底，再适配任务</td></tr>
+      <tr><td>指令微调</td><td>Instruction Tuning</td><td>用问答示范教会模型听指令</td></tr>
+      <tr><td>RLHF</td><td>RLHF</td><td>基于人类反馈的强化学习对齐</td></tr>
+      <tr><td>大语言模型</td><td>Large Language Model (LLM)</td><td>百亿参数以上的语言模型</td></tr>
+      <tr><td>提示工程</td><td>Prompt Engineering</td><td>设计输入引导模型输出</td></tr>
+      <tr><td>幻觉</td><td>Hallucination</td><td>模型编造看似合理实则错误的内容</td></tr>
+      <tr><td>上下文窗口</td><td>Context Window</td><td>一次可输入的 token 上限</td></tr>
+      <tr><td>温度采样</td><td>Temperature Sampling</td><td>控制生成随机性的参数</td></tr>
+      <tr><td>RAG</td><td>RAG</td><td>先检索资料再生成，缓解幻觉</td></tr>
+      <tr><td>BLEU</td><td>BLEU</td><td>机器翻译评估（n-gram 精确率）</td></tr>
+      <tr><td>ROUGE</td><td>ROUGE</td><td>文本摘要评估（召回率导向）</td></tr>
+      <tr><td>语料库</td><td>Corpus</td><td>用于训练和统计的大规模文本集合</td></tr>
+      <tr><td>词表</td><td>Vocabulary</td><td>模型认识的词的集合</td></tr>
+    </table>
+  </section>
+
+  </main>
+</div>
+
+<button class="to-top" id="toTop" title="回到顶部">&#8593;</button>
+<footer id="foot">自然语言处理入门互动教程 · 本地网页 · 无任何依赖</footer>
+
+<script src="demos.js"></script>
+</body>
+</html>
