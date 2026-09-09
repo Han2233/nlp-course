@@ -225,6 +225,7 @@ strong { color: var(--ink); }
   border-radius: 12px; padding: 18px 22px; margin: 14px 0;
   font-family: "SF Mono", Menlo, Consolas, "Courier New", monospace;
   font-size: 14px; line-height: 1.7; overflow-x: auto;
+  white-space: pre-wrap;          /* 保留代码换行与缩进 */
 }
 .code .cm { color: #64748b; }
 .code .kw { color: #f472b6; }
