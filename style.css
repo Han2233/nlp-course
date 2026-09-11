@@ -410,3 +410,13 @@ footer { text-align: center; color: var(--ink-faint); font-size: 14px; padding: 
   .formula { font-size: 16px; }
   .pp-label { flex-basis: 78px; }
 }
+
+/* ---------- Bigram 计数工厂（第 5 章新增） ---------- */
+.ng-factory .sent-line { margin: 6px 0; line-height: 2; }
+.ng-factory .chip.hl {
+  background: #fef3c7; border-color: #f59e0b; color: #92400e; font-weight: 700;
+}
+.ng-factory .chip.succ {
+  background: #dcfce7; border-color: #86efac; color: #166534; font-weight: 700;
+}
+.ng-factory .count-note { font-size: 13.5px; color: var(--ink-soft); margin: 8px 0 2px; }

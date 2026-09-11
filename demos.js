@@ -468,6 +468,97 @@ function watchSize(canvas, redraw) {
 })();
 
 /* ============================================================
+   演示 4+：Bigram 计数工厂
+   3 句迷你语料：点击词 → 高亮「上一个词位置」与后继词 → 计数表 → 概率
+   ============================================================ */
+(function () {
+  const toksEl = document.getElementById('ngf-toks');
+  const corpusEl = document.getElementById('ngf-corpus');
+  const tableEl = document.getElementById('ngf-table');
+  const infoEl = document.getElementById('ngf-info');
+
+  // 3 句迷你语料，与正文 5.1 的手算例子完全一致
+  const CORPUS = [
+    ['我', '爱', '吃', '苹果'],
+    ['我', '爱', '学习'],
+    ['他', '爱', '吃', '西瓜'],
+  ];
+  const VOCAB = ['我', '爱', '吃', '苹果', '学习', '他', '西瓜'];
+  const V = VOCAB.length;
+
+  let sel = '爱';
+
+  function render() {
+    // 词条按钮
+    toksEl.innerHTML = VOCAB.map((w) =>
+      '<button class="btn' + (w === sel ? ' on' : '') + '" data-w="' + w + '">' + w + '</button>'
+    ).join('');
+
+    // 语料展示：黄色 = 作为「上一个词」的位置；绿色 = 它的后继词
+    corpusEl.innerHTML = '<h4 style="margin:12px 0 6px">语料（黄 = 上一个词「' + esc(sel) + '」，绿 = 它右边的后继词）</h4>' +
+      CORPUS.map((sent, si) =>
+        '<div class="sent-line">' +
+        sent.map((w, wi) => {
+          const isPrev = w === sel && wi < sent.length - 1;   // 必须是句中的位置（后面还有词）
+          const isSucc = isPrev;                               // 后继词由下一行判断
+          const isSuccWord = wi > 0 && sent[wi - 1] === sel;
+          let cls = 'chip zh';
+          if (isPrev) cls += ' hl';
+          if (isSuccWord) cls += ' succ';
+          return '<span class="' + cls + '">' + esc(w) + '</span> ';
+        }).join('') + '</div>'
+      ).join('');
+
+    // 计数：只在「后面还有词」的位置统计（这才是 bigram 的「上一个词」）
+    let total = 0;
+    const succCount = {};
+    CORPUS.forEach((sent) => {
+      sent.forEach((w, i) => {
+        if (w === sel && i < sent.length - 1) {
+          total++;
+          const s = sent[i + 1];
+          succCount[s] = (succCount[s] || 0) + 1;
+        }
+      });
+    });
+    const succs = Object.keys(succCount).sort((a, b) => succCount[b] - succCount[a]);
+
+    // 计数表 + 加一平滑概率
+    let rows = '';
+    succs.forEach((s) => {
+      const c = succCount[s];
+      const p = (c + 1) / (total + V);
+      rows += '<tr><td>' + esc(s) + '</td><td>' + c + '</td><td>' +
+        'P(' + esc(s) + '|' + esc(sel) + ') = (' + c + '+1)/(' + total + '+' + V + ') = <b>' + fmt(p, 3) + '</b></td></tr>';
+    });
+    // 没出现过的后继词（平滑后概率 = 1/(total+V)）
+    const unseen = VOCAB.filter((w) => w !== sel && !(w in succCount));
+    if (unseen.length > 0) {
+      const p = 1 / (total + V);
+      rows += '<tr><td style="color:var(--ink-faint)">' + unseen.map(esc).join('、') + '（未出现）</td><td>0</td><td>' +
+        'P(·|' + esc(sel) + ') = (0+1)/(' + total + '+' + V + ') = <b>' + fmt(p, 3) + '</b></td></tr>';
+    }
+
+    tableEl.innerHTML = '<h4 style="margin:12px 0 6px">计数与概率表</h4>' +
+      '<table class="tb" style="font-size:14px"><tr><th>后继词</th><th>出现次数</th><th>加一平滑后的概率</th></tr>' + rows + '</table>';
+
+    infoEl.innerHTML =
+      '「<b>' + esc(sel) + '</b>」作为上一个词共出现 <b>' + total + '</b> 次' +
+      (total === 0 ? '——它从未出现在句中位置（都在句尾），所以所有后继词的概率都靠平滑给出 1/' + V + ' ≈ ' + fmt(1 / V, 3) + '，这就是数据稀疏。' : '。') +
+      (total > 0 ? '　词典大小 V = ' + V + '。<br>例：P(吃|' + esc(sel) + ') = (count(' + esc(sel) + ',吃)+1)/(count(' + esc(sel) + ')+V) = ' +
+        '(' + (succCount['吃'] || 0) + '+1)/(' + total + '+' + V + ') = <b>' + fmt(((succCount['吃'] || 0) + 1) / (total + V), 3) + '</b>' : '');
+  }
+
+  toksEl.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-w]');
+    if (!b) return;
+    sel = b.dataset.w;
+    render();
+  });
+  render();
+})();
+
+/* ============================================================
    演示 4：Bigram 语言模型
    小语料统计二元组合 → 预测下一个词 / 随机生成 / 困惑度
    ============================================================ */

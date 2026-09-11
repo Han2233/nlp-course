@@ -325,39 +325,69 @@
     <h2><span class="chapter-no">5</span>N-gram 语言模型：让机器「接话」</h2>
     <p class="chapter-sub">N-gram Language Models</p>
 
-    <p>语言模型（<span class="en">Language Model</span>，LM）回答一个问题：<strong>「这句话有多像人话？」</strong>——给任意词序列打一个概率。它是一切「预测下一个词」任务的数学基础：输入法联想、语音识别纠错、机器翻译选句，直到今天的 GPT。</p>
+    <p>语言模型（<span class="en">Language Model</span>，LM）回答两个问题：<strong>①「这句话有多像人话？」——给任意词序列打一个概率；②「下一个词最可能是什么？」——算条件概率 P(下一个词 | 前面的词)</strong>。输入法联想、语音识别纠错、机器翻译选句，甚至今天的 GPT，本质上都在做这两件事。</p>
 
-    <h3>5.1 链式法则：句子概率怎么算</h3>
-    <p>一句话 w₁w₂…wₙ 的概率按链式法则（<span class="en">Chain Rule</span>）拆成条件概率连乘：</p>
-    <div class="formula">
-      <span class="fn">链式法则（精确但不可行——每种历史都要求一个参数）：</span>
-      <i>P</i>(w₁…wₙ) = <i>P</i>(w₁)·<i>P</i>(w₂|w₁)·<i>P</i>(w₃|w₁w₂)⋯<i>P</i>(wₙ|w₁…wₙ₋₁)
+    <div class="analogy"><span class="tag">先忘掉公式</span>N-gram 语言模型的核心思想土得不能再土：<strong>「数数，然后做除法」</strong>。想知道「爱」后面最可能跟什么词？把语料里所有「爱」找出来，数一数它右边各出现了什么词——出现最多的，就是模型认为最可能的接话。这就是全部秘密。</div>
+
+    <h3>5.1 先会数数：Bigram 计数（本章核心，务必看懂）</h3>
+    <p>用 3 句话的迷你语料手把手数一遍：</p>
+    <div class="code">语料（共 3 句，词之间用空格分隔）：
+我 爱 吃 苹果
+我 爱 学习
+他 爱 吃 西瓜
+
+问题：已知上一个词是「爱」，下一个词最可能是谁？
+
+数数过程：
+① 在语料里圈出所有「爱」→ 共出现 3 次（作为「上一个词」的位置）
+② 看每个「爱」右边跟着谁：第 1 句→「吃」、第 2 句→「学习」、第 3 句→「吃」
+③ 汇总：吃 ×2，学习 ×1
+
+结论：P(吃|爱) = 2/3 ≈ 0.67，P(学习|爱) = 1/3 ≈ 0.33，其余为 0。
+「爱」后面接「吃」的可能性最大——机器就是这么「学会接话」的。</div>
+
+    <h3>5.2 动手数一数：Bigram 计数工厂</h3>
+    <div class="demo ng-factory">
+      <p class="demo-title">演示 4+ · Bigram 计数工厂（数数 → 除法 → 概率）</p>
+      <p class="demo-tip">点击任意词，语料中所有该词的「上一个词位置」会高亮为<strong>黄色</strong>、它右边的后继词高亮为<strong>绿色</strong>；下方自动生成计数表和概率（含加一平滑）。点「苹果」试试：它只出现在句尾，作为「上一个词」出现了 0 次——这就是数据稀疏。</p>
+      <div class="controls" id="ngf-toks"></div>
+      <div id="ngf-corpus"></div>
+      <div id="ngf-table"></div>
+      <div class="demo-info" id="ngf-info">点击上方词条开始</div>
     </div>
 
-    <h3>5.2 马尔可夫假设：只看前 n−1 个词</h3>
-    <p>历史越来越长，条件概率根本数不过来。N-gram 模型引入<strong>马尔可夫假设</strong>（<span class="en">Markov Assumption</span>）：下一个词只和最近的 n−1 个词有关。二元模型（<span class="en">Bigram</span>）只看前一个词，概率直接从语料里<strong>数出来</strong>：</p>
+    <h3>5.3 概率 = 数数 ÷ 数数（极大似然估计）</h3>
     <div class="formula">
-      <span class="fn">Bigram 概率（极大似然估计 MLE，数数即可）：</span>
+      <span class="fn">Bigram 概率：分子是「两词一起出现的次数」，分母是「前一个词出现的次数」</span>
       <i>P</i>(w<sub>i</sub>|w<sub>i−1</sub>) = <span class="frac"><span class="num">count(w<sub>i−1</sub>, w<sub>i</sub>)</span><span class="den">count(w<sub>i−1</sub>)</span></span>
     </div>
-    <p>训练语言模型 = 统计语料里「每对相邻词」的出现次数。例：语料里「我」出现 100 次，其中「我爱」出现 30 次，则 P(爱|我) = 0.3。</p>
-    <p>未出现的组合概率是 0（数据稀疏 <span class="en">Data Sparsity</span>），需要平滑（<span class="en">Smoothing</span>）——比如拉普拉斯加一平滑（<span class="en">Add-one Smoothing</span>）：</p>
+    <p>套用上面的例子：P(吃|爱) = count(爱, 吃) ÷ count(爱) = 2 ÷ 3 = 0.67。这种「让语料出现概率最大」的估计方法叫<strong>极大似然估计</strong>（<span class="en">Maximum Likelihood Estimation</span>，MLE）——说白了就是「用实际出现的频率当概率」。</p>
+    <p>但有个致命问题：语料里没见过的组合概率是 0（<strong>数据稀疏</strong> <span class="en">Data Sparsity</span>）。比如 P(苹果|爱) = 0÷3 = 0——可「我爱苹果」并不是病句！一个 0 会让整句概率连乘后变成 0。于是要<strong>平滑</strong>（<span class="en">Smoothing</span>），最经典的是拉普拉斯<strong>加一平滑</strong>（<span class="en">Add-one Smoothing</span>）：</p>
     <div class="formula">
-      <span class="fn">加一平滑（V 为词典大小，给所有组合都留一点概率）：</span>
+      <span class="fn">加一平滑：所有计数 +1，分母 + 词典大小 V（保证概率仍然加起来等于 1）</span>
       <i>P</i>(w<sub>i</sub>|w<sub>i−1</sub>) = <span class="frac"><span class="num">count(w<sub>i−1</sub>, w<sub>i</sub>) + 1</span><span class="den">count(w<sub>i−1</sub>) + <i>V</i></span></span>
     </div>
+    <p>例：本语料词典 V = {我, 爱, 吃, 苹果, 学习, 他, 西瓜} 共 7 个词。P(吃|爱) = (2+1)/(3+7) = 0.3；P(苹果|爱) = (0+1)/(3+7) = 0.1——从 0 变成了 0.1，「没见过」也有了一点点可能性。</p>
 
-    <h3>5.3 困惑度：模型的「惊讶程度」</h3>
-    <p>语言模型好不好，用困惑度（<span class="en">Perplexity</span>，PPL）衡量：模型对测试文本「平均每个词有多惊讶」，越小越好：</p>
+    <h3>5.4 整句概率：链式法则 + 马尔可夫假设</h3>
+    <p>「我 爱 吃 苹果」整句的概率怎么算？用<strong>链式法则</strong>（<span class="en">Chain Rule</span>）拆成条件概率连乘：</p>
     <div class="formula">
-      <span class="fn">困惑度（N 为词数；PPL=100 意味着平均每个词像从 100 个词里猜）：</span>
+      <span class="fn">链式法则（精确但不可行——历史越长越数不过来）：</span>
+      <i>P</i>(w₁…wₙ) = <i>P</i>(w₁)·<i>P</i>(w₂|w₁)·<i>P</i>(w₃|w₁w₂)⋯<i>P</i>(wₙ|w₁…wₙ₋₁)
+    </div>
+    <p>最后一项要看「前面所有词」，这种组合在语料里几乎数不到。N-gram 引入<strong>马尔可夫假设</strong>（<span class="en">Markov Assumption</span>）：<strong>下一个词只和最近的 n−1 个词有关</strong>。二元模型（Bigram）只回看 1 个词，于是整句概率 ≈ P(我)·P(爱|我)·P(吃|爱)·P(苹果|吃)——每一项都能用 5.3 的数数除法算出来。</p>
+
+    <h3>5.5 困惑度：模型的「惊讶程度」</h3>
+    <p>语言模型好不好，用困惑度（<span class="en">Perplexity</span>，PPL）衡量：模型对测试文本「平均每个词有多惊讶」，越小越好。直觉：PPL = 100 意味着平均每个词像是在 100 个候选里瞎猜；PPL = 10 意味着基本十猜九中。</p>
+    <div class="formula">
+      <span class="fn">困惑度（N 为词数）：</span>
       PPL = 2<sup> −<span class="frac"><span class="num">1</span><span class="den"><i>N</i></span></span> <span class="sigma"><span class="slim"><span>N</span><span>i=1</span></span><span class="sg">Σ</span></span> log₂ <i>P</i>(w<sub>i</sub>|context) </sup>
     </div>
 
-    <h3>5.4 动手玩：Bigram 语言模型</h3>
+    <h3>5.6 动手玩：预测、生成与困惑度</h3>
     <div class="demo">
       <p class="demo-title">演示 4 · Bigram 语言模型：预测下一个词 + 随机生成文本</p>
-      <p class="demo-tip">模型用内置的 10 句小语料训练（词之间用空格分隔）。输入一个词，看模型预测的下一个词的概率排名；点「随机生成」让模型按概率逐词续写（每次结果都不同！），并观察困惑度。注意：小语料生成的内容会「不像人话」，这正说明语言模型 = 语料的浓缩。</p>
+      <p class="demo-tip">建议先玩上面的「计数工厂」再玩这个。这里用 10 句稍大的语料训练：输入一个词，看预测的下一个词概率排名（就是 5.3 的公式）；点「随机生成」按概率逐词续写（每次结果不同——这就是「创造性」的来源）；底部显示困惑度。注意：小语料生成的内容会「不像人话」，正说明语言模型 = 语料的浓缩。</p>
       <div class="controls">
         <div class="ctrl-group"><label for="ng-prefix">输入前一个词</label>
           <input type="text" id="ng-prefix" value="我" placeholder="例如：我 / 机器 / 学习"></div>
@@ -371,9 +401,10 @@
 
     <div class="takeaway"><span class="tag">本章小结</span>
       <ul>
-        <li>语言模型给句子打概率；链式法则拆解 + 马尔可夫假设截断 = N-gram。</li>
-        <li>Bigram 概率就是「数数 + 除法」，加一平滑兜底没见过的组合。</li>
-        <li>困惑度越低模型越好；「预测下一个词」就是「生成文本」——GPT 就是超大号的 N-gram。</li>
+        <li>核心一句话：语言模型 = <strong>数数 + 除法</strong>，数「两词一起出现几次」÷「前词出现几次」。</li>
+        <li>没见过的组合概率为 0（数据稀疏），用加一平滑兜底：分子 +1、分母 +V。</li>
+        <li>整句概率 = 链式法则拆开 + 马尔可夫假设截断；困惑度越低模型越好。</li>
+        <li>「预测下一个词」就是「生成文本」——GPT 就是超大号的 N-gram。</li>
       </ul>
     </div>
   </section>
