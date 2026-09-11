@@ -31,9 +31,10 @@
     <a href="#sec6">6 词向量与语义</a>
     <a href="#sec7">7 序列模型 RNN/LSTM</a>
     <a href="#sec8">8 注意力与 Transformer</a>
-    <a href="#sec9">9 预训练大模型</a>
-    <a href="#sec10">10 NLP 评估</a>
-    <a href="#sec11">11 实战与路线</a>
+    <a href="#sec9">9 BERT</a>
+    <a href="#sec10">10 预训练大模型</a>
+    <a href="#sec11">11 NLP 评估</a>
+    <a href="#sec12">12 实战与路线</a>
     <a href="#glossary">术语表</a>
   </div>
 </nav>
@@ -51,9 +52,10 @@
     <a href="#sec6">6 词向量与语义</a>
     <a href="#sec7">7 序列模型 RNN/LSTM</a>
     <a href="#sec8">8 注意力与 Transformer</a>
-    <a href="#sec9">9 预训练大模型</a>
-    <a href="#sec10">10 NLP 评估</a>
-    <a href="#sec11">11 实战与路线</a>
+    <a href="#sec9">9 BERT</a>
+    <a href="#sec10">10 预训练大模型</a>
+    <a href="#sec11">11 NLP 评估</a>
+    <a href="#sec12">12 实战与路线</a>
     <a href="#glossary">附录 · 术语表</a>
   </aside>
 
@@ -671,9 +673,105 @@
     </div>
   </section>
 
-  <!-- ======================= 第九章：预训练大模型 ======================= -->
+  <!-- ======================= 第九章：BERT ======================= -->
   <section class="chapter" id="sec9">
-    <h2><span class="chapter-no">9</span>预训练大模型时代：GPT 是怎么来的</h2>
+    <h2><span class="chapter-no">9</span>BERT：双向预训练的开山之作</h2>
+    <p class="chapter-sub">BERT · Masked Language Model</p>
+
+    <p>BERT（<span class="en">Bidirectional Encoder Representations from Transformers</span>，2018，Google）是 NLP 史上里程碑：它把「预训练 + 微调」的范式推成主流，掀起了整个大模型时代。四个字记住它的性格——<strong>双向、编码器</strong>。</p>
+
+    <h3>9.1 它和 GPT 差在哪：看的方向</h3>
+    <table class="tb">
+      <tr><th></th><th>GPT</th><th>BERT</th></tr>
+      <tr><td>看的范围</td><td><b>单向</b>：从左往右，只能看已生成的词</td><td><b>双向</b>：左右上下文都看</td></tr>
+      <tr><td>用的部件</td><td>Transformer 解码器 Decoder</td><td>Transformer 编码器 Encoder</td></tr>
+      <tr><td>预训练任务</td><td>预测下一个词（自回归）</td><td>完形填空（掩码）+ 判断下一句</td></tr>
+      <tr><td>擅长</td><td>生成：写作、对话</td><td>理解：分类、抽取、检索</td></tr>
+      <tr><td>代表系列</td><td>GPT-1/2/3/4</td><td>BERT、RoBERTa、ALBERT、ELECTRA</td></tr>
+    </table>
+    <div class="analogy"><span class="tag">通俗理解</span>GPT 像「接龙游戏」：只给上半句，往下续写。BERT 像「完形填空」：中间挖一个洞，前后文都给你，猜洞里是什么——所以 BERT 天生擅长「读懂」而不是「写作」。</div>
+
+    <h3>9.2 第一个预训练任务：掩码语言模型 MLM</h3>
+    <p>掩码语言模型（<span class="en">Masked Language Model</span>，MLM）的做法：随机挖掉句中 <b>15%</b> 的词，让模型根据上下文猜被挖掉的词。挖掉的词怎么处理？课件级考点（BERT 论文细节）：</p>
+    <table class="tb">
+      <tr><th>比例</th><th>处理方式</th><th>目的</th></tr>
+      <tr><td>80%</td><td>换成特殊符号 <b>[MASK]</b></td><td>让模型学会「填空」</td></tr>
+      <tr><td>10%</td><td>换成<strong>随机词</strong></td><td>逼模型学会纠错（不能只认 [MASK]）</td></tr>
+      <tr><td>10%</td><td><strong>保持原词</strong></td><td>让模型知道「这里可能是对的，别乱改」</td></tr>
+    </table>
+    <p>为什么不 100% 用 [MASK]？因为下游微调时句子里<strong>根本没有 [MASK]</strong>——预训练和微调不一致会让模型水土不服。80/10/10 的混合就是为了一致性。</p>
+
+    <h3>9.3 第二个预训练任务：下一句预测 NSP</h3>
+    <p>下一句预测（<span class="en">Next Sentence Prediction</span>，NSP）：输入两句 A、B，50% 的情况下 B 真是 A 的下一句、50% 是随机抓来的句子，让模型判断「是不是下一句」。目的是让模型理解<strong>句间关系</strong>（问答、推理都靠它）。后来的研究发现 NSP 作用有限（RoBERTa 直接删掉了它），但考试常考。</p>
+
+    <h3>9.4 输入长什么样：三种嵌入相加</h3>
+    <div class="formula">
+      <span class="fn">BERT 每个 token 的输入向量 = 三者相加（考点！）：</span>
+      输入 = 词元嵌入 Token Embedding + 段嵌入 Segment Embedding + 位置嵌入 Position Embedding
+    </div>
+    <div class="demo" style="padding:12px 10px">
+      <div class="pipeline" style="justify-content:center">
+        <div class="pipe-step"><b>[CLS]</b>句首标记<br>输出代表整句</div>
+        <div class="pipe-step"><b>我</b></div>
+        <div class="pipe-step"><b>爱</b></div>
+        <div class="pipe-step"><b>[MASK]</b>被挖的词</div>
+        <div class="pipe-step"><b>学习</b></div>
+        <div class="pipe-step"><b>[SEP]</b>句尾/分句</div>
+      </div>
+    </div>
+    <ul>
+      <li><strong>[CLS]</strong>：每句开头，它最后的输出被当成「整句表示」——单句分类、句对分类都拿它接输出层；</li>
+      <li><strong>[SEP]</strong>：句尾，同时用来分隔两句话；</li>
+      <li><strong>Segment Embedding</strong>：标记每个词属于 A 句还是 B 句（句对任务需要）；</li>
+      <li><strong>Position Embedding</strong>：补上词序信息（Transformer 本身不分先后）。</li>
+    </ul>
+
+    <h3>9.5 怎么用：微调 Fine-tuning</h3>
+    <p>预训练好的 BERT 是「通才」；下游任务只需在它上面<strong>加一个薄薄的输出层</strong>，用少量标注数据微调全部或部分参数：</p>
+    <table class="tb">
+      <tr><th>下游任务</th><th>怎么接 BERT</th><th>例子</th></tr>
+      <tr><td>单句分类</td><td>取 <b>[CLS]</b> 的输出接分类器</td><td>情感分析、垃圾评论识别</td></tr>
+      <tr><td>句对分类</td><td>两句拼一起，[CLS] 输出接分类器</td><td>自然语言推理 NLI、相似度判断</td></tr>
+      <tr><td>序列标注</td><td><b>每个 token</b> 的输出各接分类器</td><td>命名实体识别 NER、分词</td></tr>
+      <tr><td>抽取式问答</td><td>预测答案在文中的<strong>起止位置</strong></td><td>SQuAD 式机器阅读理解</td></tr>
+    </table>
+
+    <h3>9.6 动手玩</h3>
+    <div class="demo">
+      <p class="demo-title">演示 7 · BERT 完形填空实验室（MLM 模拟）</p>
+      <p class="demo-tip">选一句带空白的句子，点「让 BERT 填空」：先展示输入序列如何变成 [MASK] 形式（80% 概率替换），再给出候选预测。本演示用预置答案<strong>模拟</strong>预测结果——真实 BERT 会在 3 万词表上输出完整概率分布。</p>
+      <div class="controls" id="mlm-toks"></div>
+      <div class="controls">
+        <button class="btn primary" id="mlm-go">让 BERT 填空</button>
+      </div>
+      <div id="mlm-out"></div>
+      <div class="demo-info" id="mlm-info"></div>
+    </div>
+
+    <div class="demo">
+      <p class="demo-title">演示 8 · NSP 下一句判断小测</p>
+      <p class="demo-tip">BERT 的第二个预训练任务：判断 B 句是不是 A 句的下一句。4 组句子，选「是 / 否」后交卷——体会「句间关系理解」到底在考模型什么。</p>
+      <div id="nsp-box"></div>
+      <div class="controls">
+        <button class="btn primary" id="nsp-submit">交卷判分</button>
+        <button class="btn" id="nsp-reset">重新作答</button>
+      </div>
+      <div class="quiz-score" id="nsp-score" style="display:none"></div>
+    </div>
+
+    <div class="takeaway"><span class="tag">本章小结</span>
+      <ul>
+        <li>BERT = 双向 Transformer 编码器；完形填空（MLM）+ 下一句预测（NSP）两个预训练任务。</li>
+        <li>MLM 挖 15% 的词：80% [MASK]、10% 随机词、10% 保留（为预训练/微调一致性）。</li>
+        <li>输入 = Token + Segment + Position 三种嵌入相加；[CLS]/[SEP]/[MASK] 三个特殊标记。</li>
+        <li>下游微调四种接法：单句分类、句对分类、序列标注、问答起止位置。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ======================= 第九章：预训练大模型 ======================= -->
+  <section class="chapter" id="sec10">
+    <h2><span class="chapter-no">10</span>预训练大模型时代：GPT 是怎么来的</h2>
     <p class="chapter-sub">Pre-trained Language Models · LLMs</p>
 
     <h3>9.1 核心思想：先「读万卷书」，再「干一行」</h3>
@@ -719,15 +817,15 @@
     <div class="takeaway"><span class="tag">本章小结</span>
       <ul>
         <li>预训练（海量文本预测下一个词/完形填空）→ 微调/提示，是大模型范式。</li>
-        <li>BERT 双向重理解，GPT 单向重生成；ChatGPT = 预训练 + 指令微调 + RLHF。</li>
+        <li>BERT 双向重理解（详见第 9 章），GPT 单向重生成；ChatGPT = 预训练 + 指令微调 + RLHF。</li>
         <li>本质仍是「语言模型」：概率续写。幻觉、随机性都源于此。</li>
       </ul>
     </div>
   </section>
 
   <!-- ======================= 第十章：NLP 评估 ======================= -->
-  <section class="chapter" id="sec10">
-    <h2><span class="chapter-no">10</span>NLP 任务怎么打分</h2>
+  <section class="chapter" id="sec11">
+    <h2><span class="chapter-no">11</span>NLP 任务怎么打分</h2>
     <p class="chapter-sub">Evaluation Metrics</p>
 
     <h3>10.1 分类任务：沿用经典指标</h3>
@@ -764,8 +862,8 @@
   </section>
 
   <!-- ======================= 第十一章：实战与路线 ======================= -->
-  <section class="chapter" id="sec11">
-    <h2><span class="chapter-no">11</span>实战案例与学习路线</h2>
+  <section class="chapter" id="sec12">
+    <h2><span class="chapter-no">12</span>实战案例与学习路线</h2>
     <p class="chapter-sub">Hands-on · Roadmap</p>
 
     <h3>11.1 案例一：中文情感分析（经典机器学习，20 行搞定）</h3>
@@ -904,6 +1002,14 @@ gen = pipeline(<span class="cap">"text-generation"</span>, model=<span class="ca
       <tr><td>ROUGE</td><td>ROUGE</td><td>文本摘要评估（召回率导向）</td></tr>
       <tr><td>语料库</td><td>Corpus</td><td>用于训练和统计的大规模文本集合</td></tr>
       <tr><td>词表</td><td>Vocabulary</td><td>模型认识的词的集合</td></tr>
+      <tr><td>掩码语言模型</td><td>Masked Language Model (MLM)</td><td>BERT 预训练任务：挖掉 15% 的词让模型根据上下文填空</td></tr>
+      <tr><td>下一句预测</td><td>Next Sentence Prediction (NSP)</td><td>BERT 预训练任务：判断 B 句是不是 A 句的下一句</td></tr>
+      <tr><td>[CLS]</td><td>[CLS]</td><td>句首特殊标记，其输出代表整句（分类任务用）</td></tr>
+      <tr><td>[SEP]</td><td>[SEP]</td><td>句尾标记，同时用于分隔句对</td></tr>
+      <tr><td>[MASK]</td><td>[MASK]</td><td>掩码标记：MLM 中被挖掉的词的位置</td></tr>
+      <tr><td>段嵌入</td><td>Segment Embedding</td><td>标记 token 属于 A 句还是 B 句的嵌入</td></tr>
+      <tr><td>自然语言推理</td><td>Natural Language Inference (NLI)</td><td>判断两句间蕴含/矛盾/中立关系的任务</td></tr>
+      <tr><td>命名实体识别</td><td>Named Entity Recognition (NER)</td><td>识别文本中的人名、地名、机构名等实体</td></tr>
     </table>
   </section>
 

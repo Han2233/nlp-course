@@ -946,6 +946,130 @@ function watchSize(canvas, redraw) {
 })();
 
 /* ============================================================
+   演示 7：BERT 完形填空实验室（MLM 教学模拟）
+   选句 → 展示 [MASK] 输入形式 → 模拟预测 top3
+   ============================================================ */
+(function () {
+  const toksEl = document.getElementById('mlm-toks');
+  const goBtn = document.getElementById('mlm-go');
+  const outEl = document.getElementById('mlm-out');
+  const infoEl = document.getElementById('mlm-info');
+
+  // 预置例句：maskIdx = 被挖词在句子中的位置
+  const ITEMS = [
+    { sent: '今天 天气 很 好 我们 去 公园 野餐', maskIdx: 3, ans: '好', top: [['好', 0.62], ['不错', 0.21], ['冷', 0.05]] },
+    { sent: '他 把 钥匙 忘 在 家 了', maskIdx: 5, ans: '家', top: [['家', 0.48], ['办公室', 0.27], ['车上', 0.11]] },
+    { sent: '机器 学习 是 一门 研究 如何 让 计算机 自动 学习 的 科学', maskIdx: 9, ans: '学习', top: [['学习', 0.55], ['改进', 0.18], ['工作', 0.08]] },
+    { sent: '手机 没电 了 我 到处 找 充电器', maskIdx: 7, ans: '充电器', top: [['充电器', 0.58], ['插座', 0.19], ['数据线', 0.09]] },
+  ];
+
+  let sel = 0;
+
+  function renderToks() {
+    toksEl.innerHTML = ITEMS.map((it, i) =>
+      '<button class="btn' + (i === sel ? ' on' : '') + '" data-i="' + i + '">句子 ' + (i + 1) + '</button>'
+    ).join('');
+    outEl.innerHTML = '';
+    infoEl.innerHTML = '选一句（或点已选中的句子换一句），然后点「让 BERT 填空」。';
+  }
+
+  toksEl.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-i]');
+    if (!b) return;
+    sel = parseInt(b.dataset.i, 10);
+    renderToks();
+  });
+
+  goBtn.addEventListener('click', () => {
+    const it = ITEMS[sel];
+    const toks = it.sent.split(' ');
+    // 80% 概率换成 [MASK]（模拟 BERT 的 80/10/10 策略；这里演示最常见的情形）
+    const masked = toks.slice();
+    masked[it.maskIdx] = '[MASK]';
+    outEl.innerHTML =
+      '<p style="margin:10px 0 4px"><b>① 输入序列（被挖的词换成 [MASK]）：</b></p>' +
+      '<p style="font-family:var(--font-serif);font-size:15px">[CLS] ' +
+      masked.map((t, i2) =>
+        (i2 === it.maskIdx ? '<span style="background:#fef3c7;border:1px solid #f59e0b;border-radius:6px;padding:0 6px;font-weight:700;color:#92400e">' + t + '</span>' : t)
+      ).join(' ') + ' [SEP]</p>' +
+      '<p style="margin:10px 0 4px"><b>② BERT 在 [MASK] 位置的预测（模拟）：</b></p>' +
+      it.top.map((t2) =>
+        '<div class="ngram-item"><span class="w">' + t2[0] + '</span>' +
+        '<span class="track"><span class="fill" style="width:' + Math.round(t2[1] / it.top[0][1] * 100) + '%"></span></span>' +
+        '<span class="p">' + t2[1].toFixed(2) + '</span></div>'
+      ).join('') +
+      '<p style="margin:10px 0 0"><b>③ 损失计算：</b>模型的 [MASK] 输出是一个覆盖整个词表（约 3 万词）的 Softmax 概率分布，与正确答案「' + it.ans + '」做<strong>交叉熵</strong>，得到梯度回传更新参数。</p>';
+    infoEl.innerHTML = '答案应为「<b>' + it.ans + '</b>」。真实 BERT 靠左右上下文双向注意力猜词：本演示为教学模拟，预置了 top3 概率；真实模型会在 3 万词表上输出完整分布。注意「' + it.top[0][0] + '」概率最高——上下文（前后文）越充分，预测越准。';
+  });
+
+  renderToks();
+})();
+
+/* ============================================================
+   演示 8：NSP 下一句判断小测（4 组句对）
+   ============================================================ */
+(function () {
+  const boxEl = document.getElementById('nsp-box');
+  const submitBtn = document.getElementById('nsp-submit');
+  const resetBtn = document.getElementById('nsp-reset');
+  const scoreEl = document.getElementById('nsp-score');
+
+  const ITEMS = [
+    { a: '我早上起床后刷牙洗脸。', b: '然后我去公司上班。', ans: 0, exp: '话题连贯（晨起 → 上班），是真实下一句。' },
+    { a: '他昨天买了一张电影票。', b: '香蕉含有丰富的钾元素。', ans: 1, exp: '两句毫无关联，是随机拼接的句子。' },
+    { a: '小明参加高考取得了好成绩。', b: '他被理想大学录取了。', ans: 0, exp: '「高考好成绩 → 被录取」因果连贯，是下一句。' },
+    { a: '这是一本关于烹饪的书。', b: '与此同时，木星是太阳系最大的行星。', ans: 1, exp: '话题从烹饪跳到天文，是随机句。' },
+  ];
+  const LABELS = ['是下一句', '不是下一句'];
+
+  const st = { user: {}, answered: false };
+
+  function render() {
+    boxEl.innerHTML = ITEMS.map((it, i) =>
+      '<div class="quiz-q" id="nsp-' + i + '" data-qi="' + i + '">' +
+      '<div class="qtext">第 ' + (i + 1) + ' 组：<br>A：' + esc(it.a) + '<br>B：' + esc(it.b) + '</div>' +
+      LABELS.map((lab, k) =>
+        '<label class="opt"><input type="radio" name="nspq' + i + '" value="' + k + '"' +
+        (st.user[i] === k ? ' checked' : '') + '> ' + lab + '</label>'
+      ).join('') +
+      '<div class="quiz-explain"><b>解析：</b>' + esc(it.exp) + '</div>' +
+      '</div>'
+    ).join('');
+    scoreEl.style.display = 'none';
+    st.answered = false;
+  }
+
+  boxEl.addEventListener('change', (e) => {
+    if (e.target.type !== 'radio') return;
+    const i = parseInt(e.target.closest('.quiz-q').dataset.qi, 10);
+    st.user[i] = parseInt(e.target.value, 10);
+  });
+
+  submitBtn.addEventListener('click', () => {
+    if (st.answered) return;
+    let correct = 0;
+    ITEMS.forEach((it, i) => {
+      const el = document.getElementById('nsp-' + i);
+      el.classList.add('done');
+      const opts = el.querySelectorAll('label.opt');
+      opts.forEach((lab, k) => { if (k === it.ans) lab.classList.add('correct'); });
+      if (st.user[i] === it.ans) correct++;
+      else if (st.user[i] !== undefined) opts[st.user[i]].classList.add('wrong');
+    });
+    st.answered = true;
+    const pct = correct / ITEMS.length;
+    scoreEl.style.display = 'block';
+    scoreEl.innerHTML = '得分：<b>' + correct + ' / ' + ITEMS.length + '</b>　正确率 ' + fmt(pct * 100, 0) + '%' +
+      '<div class="bar" style="height:12px;background:#d1fae5;border-radius:999px;overflow:hidden;margin-top:8px"><div style="height:100%;width:' + fmt(pct * 100, 0) + '%;background:linear-gradient(90deg,#0d9488,#0e7490)"></div></div>' +
+      '<div style="font-size:14px;color:var(--ink-soft);margin-top:8px">' +
+      (pct === 1 ? '句间关系判断满分——这就是 NSP 任务在训练的能力。' : 'NSP 考的就是「两句是否话题连贯」，回看解析找找语感。') + '</div>';
+  });
+
+  resetBtn.addEventListener('click', () => { st.user = {}; render(); });
+  render();
+})();
+
+/* ============================================================
    页面级 UI：导航高亮 + 回到顶部
    ============================================================ */
 (function () {
